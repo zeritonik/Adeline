@@ -1,0 +1,135 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <!-- Bootstrap CSS -->
+    <link href="css/main.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
+
+    <title>Result</title>
+  </head>
+  <body>
+    <header>
+        <nav class="navbar navbar-expand-lg navbar-light bg-light">
+            <div class="container-fluid">
+                <div>
+                    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#main-navigation" aria-controls="main-navigation">
+                        <span class="navbar-toggler-icon"></span>
+                    </button>
+                </div>
+
+                <div class="collapse navbar-collapse flex-grow-0" id="main-navigation">
+                    <ul class="navbar-nav">
+                        <li class="nav-item"><a href="#About" class="nav-link">About</a></li>
+                        <li class="nav-item"><a href="#Examples" class="nav-link">Examples</a></li>
+                        <li class="nav-item"><a href="#Try" class="nav-link">Try it!</a></li>
+                    </ul>
+                </div>
+
+                <div class="mx-auto">
+                    <a href="" class="navbar-brand">Adeline</a>
+                </div>
+
+                <div class="dropdown">
+                    <button class="btn px-1" data-bs-toggle="dropdown" aria-expanded="false">
+                        <img class="border border-1 rounded-circle" src="img/user.svg" alt="icon" style="width: 3rem; height: 3rem;">
+                        Profile
+                    </button>
+                    <ul class="dropdown-menu dropdown-menu-end">
+                        <li><a class="dropdown-item" href="">Profile</a></li>
+                        <li><a class="dropdown-item" href="">Log in</a></li>
+                        <li><a class="dropdown-item" href="">Register</a></li>
+                    </ul>
+                </div>
+
+            </div>
+        </nav>
+    </header>
+    
+    <section class="container my-4">
+        <h2 class="mb-4">Результаты тестирования</h2>
+        <div class="mb-4 row row-cols-1 row-cols-md-2 row-cols-lg-3 gy-3">
+            <div class="col">
+                <div class="card">
+                    <div class="card-body">
+                        <h4 class="card-title">Группа тестов 1</h4>
+                        <p class="m-0">Общий вердикт: <span class="text-success">пройдена</span></p>
+                    </div>
+                    <div class="collapse" id="Tests1-collapse">
+                        <ul class="list-group">
+                            <li class="list-group-item text-success">Тест 1: passed</li>
+                            <li class="list-group-item text-success">Тест 2: passed</li>
+                            <li class="list-group-item text-success">Тест 3: passed</li>
+                            <li class="list-group-item text-success">Тест 4: passed</li>
+                            <li class="list-group-item text-success">Тест 5: passed</li>
+                        </ul>
+                    </div>
+                    <button class="btn btn-primary" data-bs-toggle="collapse" data-bs-target="#Tests1-collapse" aria-expanded="false">Show details</button>
+                </div>
+            </div>
+            <div class="col">
+                <div class="card">
+                    <div class="card-body">
+                        <h4 class="card-title">Группа тестов 2</h4>
+                        <p class="m-0">Общий вердикт: <span class="text-danger">не пройдена</span></p>
+                    </div>
+                    <div class="collapse" id="Tests2-collapse">
+                        <ul class="list-group">
+                            <li class="list-group-item text-success">Тест 1: passed</li>
+                            <li class="list-group-item text-success">Тест 2: passed</li>
+                            <li class="list-group-item text-success">Тест 3: passed</li>
+                            <li class="list-group-item text-danger">Тест 4: not passed</li>
+                        </ul>
+                    </div>
+                    <button class="btn btn-primary" data-bs-toggle="collapse" data-bs-target="#Tests2-collapse" aria-expanded="false">Show details</button>
+                </div>
+            </div>
+            <div class="col">
+                <div class="card">
+                    <div class="card-body">
+                        <h4 class="card-title">Группа тестов 3</h4>
+                        <p class="m-0">Общий вердикт: <span class="text-danger">не пройдена</span></p>
+                    </div>
+                    <div class="collapse" id="Tests3-collapse">
+                        <ul class="list-group">
+                            <li class="list-group-item text-success">Тест 1: passed</li>
+                            <li class="list-group-item text-danger">Тест 2: not passed</li>
+                            <li class="list-group-item text-success">Тест 3: passed</li>
+                        </ul>
+                    </div>
+                    <button class="btn btn-primary" data-bs-toggle="collapse" data-bs-target="#Tests3-collapse" aria-expanded="false">Show details</button>
+                </div>
+            </div>
+            <div class="col">
+                <div class="card">
+                    <div class="card-body">
+                        <h4 class="card-title">Группа тестов 4</h4>
+                        <p class="m-0">Общий вердикт: <span class="text-success">пройдена</span></p>
+                    </div>
+                    <div class="collapse" id="Tests4-collapse">
+                        <ul class="list-group">
+                            <li class="list-group-item text-success">Тест 1: passed</li>
+                            <li class="list-group-item text-success">Тест 2: passed</li>
+                            <li class="list-group-item text-success">Тест 3: passed</li>
+                            <li class="list-group-item text-success">Тест 4: passed</li>
+                            <li class="list-group-item text-success">Тест 5: passed</li>
+                        </ul>
+                    </div>
+                    <button class="btn btn-primary" data-bs-toggle="collapse" data-bs-target="#Tests4-collapse" aria-expanded="false">Show details</button>
+                </div>
+            </div>
+        </div>
+        <div class="d-flex flex-column gap-2">
+            <h3>Your code:</h3>
+            <textarea name="code-text" id="code-text" rows="18" readonly>
+print("Hello, world!")
+            </textarea>
+        </div>
+    </section>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM" crossorigin="anonymous"></script>
+  </body>
+</html>

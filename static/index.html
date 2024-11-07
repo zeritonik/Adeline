@@ -1,0 +1,111 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <!-- Bootstrap CSS -->
+    <link href="css/main.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
+
+    <title>Adeline</title>
+  </head>
+  <body>
+    <header>
+        <nav class="navbar navbar-expand-lg navbar-light bg-light">
+            <div class="container-fluid">
+                <div>
+                    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#main-navigation" aria-controls="main-navigation">
+                        <span class="navbar-toggler-icon"></span>
+                    </button>
+                </div>
+
+                <div class="collapse navbar-collapse flex-grow-0" id="main-navigation">
+                    <ul class="navbar-nav">
+                        <li class="nav-item"><a href="#About" class="nav-link">About</a></li>
+                        <li class="nav-item"><a href="#Examples" class="nav-link">Examples</a></li>
+                        <li class="nav-item"><a href="#Try" class="nav-link">Try it!</a></li>
+                    </ul>
+                </div>
+
+                <div class="mx-auto">
+                    <a href="" class="navbar-brand">Adeline</a>
+                </div>
+
+                <div class="dropdown">
+                    <button class="btn px-1" data-bs-toggle="dropdown" aria-expanded="false">
+                        <img class="border border-1 rounded-circle" src="img/user.svg" alt="icon" style="width: 3rem; height: 3rem;">
+                        Profile
+                    </button>
+                    <ul class="dropdown-menu dropdown-menu-end">
+                        <li><a class="dropdown-item" href="">Profile</a></li>
+                        <li><a class="dropdown-item" href="">Log in</a></li>
+                        <li><a class="dropdown-item" href="">Register</a></li>
+                    </ul>
+                </div>
+
+            </div>
+        </nav>
+    </header>
+
+    <section class="container my-4" id="About">
+        <h2 class="mb-4">About Adeline</h2>
+        <p class="w-50">
+            Adeline - платформа для удалённой сборки и тестирования проектов и решений
+        </p>
+    </section>
+
+    <section class="container my-4" id="Examples">
+        <h2 class="mb-4">Usage examples</h2>
+        <p class="w-50">
+            Примеры использования
+        </p>
+    </section>
+
+    <section class="container my-4" id="Try">
+        <h2 class="mb-4">Try it!</h2>
+        <ul class="nav nav-tabs" role="tablist">
+            <li class="nav-item"><button class="nav-link active" data-bs-toggle="tab" data-bs-target="#registration" role="tab">Register</button></li>
+            <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#log-in" role="tab">Log in</button></li>
+        </ul>
+        <div class="tab-content p-2 py-3 border border-top-0 rounded">
+            <div class="tab-pane fade show active" role="tabpanel" id="registration">
+                <form class="d-flex flex-column gap-3" action="">
+                    <div class="form-floating">
+                        <input class="form-control" type="text" name="login" id="register-login" placeholder="login" required>
+                        <label for="register-login">Login:</label>
+                    </div>
+                    <div class="form-floating">
+                        <input class="form-control" type="password" name="password" id="register-password" placeholder="password" required>
+                        <label for="register-password">Password:</label>
+                    </div>
+                    <div class="form-floating">
+                        <input class="form-control" type="password" id="repeat-register-password" placeholder="password" required>
+                        <label for="repeat-register-password">Repeat password:</label>
+                    </div>
+                    <div>
+                        <button type="submit" class="btn btn-primary rounded-3">Зарегистрироваться</button>
+                    </div>
+                </form>
+            </div>
+            <div class="tab-pane fade" role="tabpanel" id="log-in">
+                <form class="d-flex flex-column gap-3" action="">
+                    <div class="form-floating">
+                        <input class="form-control" type="text" name="login" id="log-in-login" placeholder="login" required>
+                        <label for="log-in-login">Login:</label>
+                    </div>
+                    <div class="form-floating">
+                        <input class="form-control" type="password" name="password" id="log-in-password" placeholder="password" required>
+                        <label for="log-in-password">Password:</label>
+                    </div>
+                    <div>
+                        <button type="submit" class="btn btn-primary rounded-3">Войти</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </section>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM" crossorigin="anonymous"></script>
+  </body>
+</html>
