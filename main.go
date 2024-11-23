@@ -1,8 +1,11 @@
 package main
 
 import (
+	"bytes"
 	"fmt"
 	"net/http"
+	"os"
+	"os/exec"
 	"path"
 	"text/template"
 )
@@ -49,12 +52,26 @@ func (p *pathResolver) ServeHTTP(res http.ResponseWriter, req *http.Request) {
 }
 
 func homepage(w http.ResponseWriter, r *http.Request) {
+
 	p := &Page{
 		Title:   "Adeline",
 		Content: "",
 	}
 	t := template.Must(template.ParseFiles("static/testing_request.html"))
+
+	var info CodeInfo
+	switch r.Method {
+	case "GET":
+		info.Language = r.URL.Query().Get("code-language")
+		info.CodeText = r.URL.Query().Get("code-text")
+		info.CodeFile = r.URL.Query().Get("code-file")
+		fmt.Println(info.Language)
+		fmt.Println(info.CodeText)
+		p = info.ExecuteProgram()
+
+	}
 	t.Execute(w, p)
+
 }
 func profilepage(w http.ResponseWriter, r *http.Request) {
 	http.ServeFile(w, r, "./static/index.html")
@@ -63,4 +80,45 @@ func profilepage(w http.ResponseWriter, r *http.Request) {
 type Page struct {
 	Title   string
 	Content string
+	err     error
+}
+
+type CodeInfo struct {
+	Language string
+	CodeText string
+	CodeFile string
+}
+
+func (code *CodeInfo) ExecuteProgram() (p *Page) {
+	cmd := exec.Command("python3", "prog.py")
+	var out bytes.Buffer
+	cmd.Stdout = &out
+
+	f, _ := os.Create("prog.py")
+	f.WriteString(code.CodeText)
+	f.Close()
+	err := cmd.Run()
+	if err == nil {
+
+		var rez string
+		for _, val := range out.Bytes() {
+			rez += (string(val))
+		}
+
+		fmt.Println(err)
+
+		p = &Page{
+			Title:   "Adeline",
+			Content: rez,
+		}
+		return p
+	} else {
+		p = &Page{
+			Title:   "Adeline",
+			Content: "Error",
+			err:     err,
+		}
+		return p
+	}
+
 }
