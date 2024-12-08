@@ -176,3 +176,55 @@ func (b *BD_handlers) Create_user(w http.ResponseWriter, r *http.Request) {
 	}
 
 }
+
+func (b *BD_handlers) Login_user(w http.ResponseWriter, r *http.Request) {
+	user := struct {
+		Login    string `json:"login"`
+		Password string `json:"password"`
+	}{}
+	switch r.Method {
+	case "POST":
+		decoder := json.NewDecoder(r.Body)
+		decoder.Decode(&user)
+		sr := b.dp.Is_In_Base(user.Login, user.Password)
+		fmt.Println(sr)
+		if !b.dp.Is_In_Base(user.Login, user.Password) {
+			w.WriteHeader(http.StatusBadRequest)
+			w.Write([]byte("Login does not exist or data is incorrect"))
+			return
+		} else {
+			s := Session{Astiay_isos: b.dp.Gen_coockie(user.Login), User_login: user.Login}
+			b.dp.CreateSession(&s)
+			cookie := http.Cookie{
+				Name:     "token",
+				Value:    s.Astiay_isos,
+				Path:     "/login",
+				MaxAge:   3600,
+				HttpOnly: true,
+				Secure:   true,
+			}
+			http.SetCookie(w, &cookie)
+			w.WriteHeader(http.StatusOK)
+
+		}
+
+	}
+}
+
+func (b *BD_handlers) Delete_Session(w http.ResponseWriter, r *http.Request) {
+	cookie := struct {
+		Cookie string `json:"Astiay_isos"`
+	}{}
+	switch r.Method {
+	case "POST":
+		decoder := json.NewDecoder(r.Body)
+		decoder.Decode(&cookie)
+		if err := b.dp.Del_session(cookie.Cookie); err != nil {
+			w.WriteHeader(http.StatusBadRequest)
+			w.Write([]byte("Session does not exist"))
+		} else {
+			w.WriteHeader(http.StatusOK)
+		}
+
+	}
+}

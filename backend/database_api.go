@@ -39,19 +39,43 @@ func (dp *DatabaseProvider) CreateUser(user *User) (er error) {
 	return err
 }
 
-func (dp *DatabaseProvider) CreateSession(session *Session) {
+func (dp *DatabaseProvider) CreateSession(session *Session) (er error) {
 	_, err := dp.db.Exec(fmt.Sprintf("INSERT INTO sessions(astiay_isos,user_login) values('%s','%s');",
 		session.Astiay_isos, session.User_login))
+	return err
+}
+func (dp *DatabaseProvider) Is_In_Base(login string, password string) (status bool) {
+	var log string
+	var pass string
+	row := dp.db.QueryRow(fmt.Sprintf("SELECT login from user_inf where login = '%s';", login))
+	if err := row.Scan(&log); err != nil || log != login {
+		return false
+	}
+	row = dp.db.QueryRow(fmt.Sprintf("SELECT password from user_inf where password = '%s';", password))
+
+	if err := row.Scan(&pass); err != nil || pass != password {
+		return false
+
+	}
+	return true
+}
+func (dp *DatabaseProvider) Gen_coockie(login string) (coockie string) {
+	row := dp.db.QueryRow("select count(*) from sessions;")
+	var k string
+	err := row.Scan(&k)
 	if err != nil {
 		log.Fatal(err)
 	}
+	return login + k
 }
 
-func Gen_coockie(login string, dp *DatabaseProvider) (coockie string) {
-	row, err := dp.db.Exec("select count(*) from sessions;")
-	if err != nil {
-		log.Fatal(err)
+func (dp *DatabaseProvider) Del_session(cookie string) (er error) {
+	var cooki string
+	row := dp.db.QueryRow(fmt.Sprintf("SELECT Astiay_isos from sessions where Astiay_isos = '%s';", cookie))
+	if err := row.Scan(&cooki); err != nil || cookie != cookie {
+		return err
 	}
-	fmt.Println(row)
-	return login
+	_, err := dp.db.Exec(fmt.Sprintf("DELETE FROM sessions WHERE Astiay_isos = '%s';", cookie))
+
+	return err
 }
