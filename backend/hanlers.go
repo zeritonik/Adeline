@@ -166,9 +166,10 @@ func (b *BD_handlers) Create_user(w http.ResponseWriter, r *http.Request) {
 		if err != nil {
 			w.WriteHeader(http.StatusBadRequest)
 			w.Write([]byte(err.Error()))
-		}
-		err = b.dp.CreateUser(&user)
-		if err != nil {
+		} else if user.Avatar == nil || user.Login == nil || user.Nickname == nil || user.Password == nil {
+			w.WriteHeader(http.StatusBadRequest)
+			w.Write([]byte("NO DATA"))
+		} else if err = b.dp.CreateUser(&user); err != nil {
 			w.WriteHeader(http.StatusBadRequest)
 			w.Write([]byte(err.Error()))
 		}
@@ -179,25 +180,32 @@ func (b *BD_handlers) Create_user(w http.ResponseWriter, r *http.Request) {
 
 func (b *BD_handlers) Login_user(w http.ResponseWriter, r *http.Request) {
 	user := struct {
-		Login    string `json:"login"`
-		Password string `json:"password"`
+		Login    *string `json:"login"`
+		Password *string `json:"password"`
 	}{}
 	switch r.Method {
 	case "POST":
 		decoder := json.NewDecoder(r.Body)
-		decoder.Decode(&user)
-		sr := b.dp.Is_In_Base(user.Login, user.Password)
-		fmt.Println(sr)
-		if !b.dp.Is_In_Base(user.Login, user.Password) {
+		if err := decoder.Decode(&user); err != nil {
+			w.WriteHeader(http.StatusBadRequest)
+			w.Write([]byte(err.Error()))
+		} else if user.Login == nil || user.Password == nil {
+			w.WriteHeader(http.StatusBadRequest)
+			w.Write([]byte("No data"))
+		} else if !b.dp.Is_In_Base(*(user.Login), *(user.Password)) {
 			w.WriteHeader(http.StatusBadRequest)
 			w.Write([]byte("Login does not exist or data is incorrect"))
 			return
 		} else {
-			s := Session{Astiay_isos: b.dp.Gen_coockie(user.Login), User_login: user.Login}
-			b.dp.CreateSession(&s)
+			cooki := (b.dp.Gen_coockie(*(user.Login)))
+			s := Session{Astiay_isos: &cooki, User_login: user.Login}
+			if err := b.dp.CreateSession(&s); err != nil {
+				w.WriteHeader(http.StatusBadRequest)
+				w.Write([]byte(err.Error()))
+			}
 			cookie := http.Cookie{
 				Name:     "token",
-				Value:    s.Astiay_isos,
+				Value:    *(s.Astiay_isos),
 				Path:     "/login",
 				MaxAge:   3600,
 				HttpOnly: true,
@@ -213,18 +221,89 @@ func (b *BD_handlers) Login_user(w http.ResponseWriter, r *http.Request) {
 
 func (b *BD_handlers) Delete_Session(w http.ResponseWriter, r *http.Request) {
 	cookie := struct {
-		Cookie string `json:"Astiay_isos"`
+		Cookies *[]*string `json:"Astiay_isos"`
+		All     *bool      `json:"all"`
 	}{}
 	switch r.Method {
 	case "POST":
 		decoder := json.NewDecoder(r.Body)
-		decoder.Decode(&cookie)
-		if err := b.dp.Del_session(cookie.Cookie); err != nil {
+		err := decoder.Decode(&cookie)
+
+		if err != nil {
 			w.WriteHeader(http.StatusBadRequest)
-			w.Write([]byte("Session does not exist"))
+			w.Write([]byte(err.Error()))
+		} else if cookie.Cookies == nil || cookie.All == nil {
+			w.WriteHeader(http.StatusBadRequest)
+			w.Write([]byte("No data"))
 		} else {
-			w.WriteHeader(http.StatusOK)
+			if !(*(cookie.All)) {
+				for i := 0; i < len(*cookie.Cookies); i++ {
+					if err := b.dp.Del_session(*(*cookie.Cookies)[i]); err != nil {
+						w.WriteHeader(http.StatusBadRequest)
+						w.Write([]byte(err.Error()))
+						break
+					}
+				}
+			} else {
+				if err := b.dp.Del_All_Sessions(); err != nil {
+					w.WriteHeader(http.StatusBadRequest)
+					w.Write([]byte(err.Error()))
+				}
+			}
 		}
+	}
+}
+
+func (b *BD_handlers) Settings(w http.ResponseWriter, r *http.Request) {
+	res := struct {
+		Login  *string `json:"login"`
+		Avatar *string `json:"avatar"`
+	}{}
+	switch r.Method {
+	case "POST":
+		decoder := json.NewDecoder(r.Body)
+		if err := decoder.Decode(&res); err != nil {
+			w.WriteHeader(http.StatusBadRequest)
+			w.Write([]byte(err.Error()))
+			return
+		}
+		if res.Login == nil || res.Avatar == nil {
+			w.WriteHeader(http.StatusBadRequest)
+			w.Write([]byte("No data"))
+			return
+		}
+		if err := b.dp.Change_user_avatar(*res.Login, *res.Avatar); err != nil {
+			w.WriteHeader(http.StatusBadRequest)
+			w.Write([]byte(err.Error()))
+			return
+
+		}
+		w.WriteHeader(http.StatusOK)
+	case "GET":
+		cookie, err := r.Cookie("Astiay_isos")
+
+		if err != nil {
+			w.WriteHeader(http.StatusBadRequest)
+			w.Write([]byte(err.Error()))
+			return
+		}
+
+		fmt.Println(cookie.Value)
+		us, err := b.dp.Get_User(cookie.Value)
+		if err != nil {
+			w.WriteHeader(http.StatusBadRequest)
+			w.Write([]byte(err.Error()))
+			return
+		}
+		if us.Login == nil || us.Avatar == nil || us.Nickname == nil {
+			w.WriteHeader(http.StatusBadRequest)
+			w.Write([]byte("Incorrect data in table"))
+			return
+		}
+
+		u, err := json.Marshal(us)
+		w.WriteHeader(http.StatusOK)
+		w.Write(u)
 
 	}
 }

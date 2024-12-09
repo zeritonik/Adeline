@@ -35,6 +35,7 @@ func main() {
 	pr.Addpath("*/register", h.Create_user)
 	pr.Addpath("*/login", h.Login_user)
 	pr.Addpath("*/logout", h.Delete_Session)
+	pr.Addpath("*/profile/setting", h.Settings)
 	var port string = ":8080"
 
 	fmt.Println("Server is listening...")

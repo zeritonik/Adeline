@@ -16,17 +16,17 @@ type Conn_inf struct {
 	Dbname   string
 }
 type User struct {
-	Login    string `json:"login"`
-	Nickname string `json:"nickname"`
-	Password string `json:"password"`
-	Avatar   string `json:"avatar"`
+	Login    *string `json:"login"`
+	Nickname *string `json:"nickname"`
+	Password *string `json:"password"`
+	Avatar   *string `json:"avatar"`
 }
 
 type Session struct {
-	Astiay_isos string
-	User_login  string
-	Creation    string
-	Expire      string
+	Astiay_isos *string
+	User_login  *string
+	Creation    *string
+	Expire      *string
 }
 
 type DatabaseProvider struct {
@@ -35,13 +35,13 @@ type DatabaseProvider struct {
 
 func (dp *DatabaseProvider) CreateUser(user *User) (er error) {
 	_, err := dp.db.Exec(fmt.Sprintf("INSERT INTO user_inf(login,nickname,password,avatar) values('%s','%s','%s','%s');",
-		user.Login, user.Nickname, user.Password, user.Avatar))
+		*(user.Login), *(user.Nickname), *(user.Password), *(user.Avatar)))
 	return err
 }
 
 func (dp *DatabaseProvider) CreateSession(session *Session) (er error) {
 	_, err := dp.db.Exec(fmt.Sprintf("INSERT INTO sessions(astiay_isos,user_login) values('%s','%s');",
-		session.Astiay_isos, session.User_login))
+		*(session.Astiay_isos), *(session.User_login)))
 	return err
 }
 func (dp *DatabaseProvider) Is_In_Base(login string, password string) (status bool) {
@@ -78,4 +78,35 @@ func (dp *DatabaseProvider) Del_session(cookie string) (er error) {
 	_, err := dp.db.Exec(fmt.Sprintf("DELETE FROM sessions WHERE Astiay_isos = '%s';", cookie))
 
 	return err
+}
+
+func (dp *DatabaseProvider) Del_All_Sessions() (err error) {
+	_, err = dp.db.Exec("truncate sessions;")
+	return
+}
+
+func (dp *DatabaseProvider) Get_User(cookie string) (us *User, err error) {
+	row := dp.db.QueryRow(fmt.Sprintf("Select login, avatar, nickname from user_inf where login = (select user_login from sessions where Astiay_isos = '%s');", cookie))
+	if row.Err() != nil {
+		return nil, row.Err()
+	}
+	user := User{}
+	var l, a, n string
+	if err := row.Scan(&l, &a, &n); err != nil {
+		return nil, err
+	}
+	user.Login = &l
+	user.Avatar = &a
+	user.Nickname = &n
+
+	return &user, nil
+
+}
+
+func (dp *DatabaseProvider) Change_user_avatar(login string, avatar string) (err error) {
+	_, err = dp.db.Exec(fmt.Sprintf("update user_inf set avatar = '%s' where login = '%s'", avatar, login))
+	if err != nil {
+		return
+	}
+	return nil
 }
