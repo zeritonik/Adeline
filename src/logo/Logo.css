@@ -1,0 +1,13 @@
+.logo {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    font-size: 1.5rem;
+    font-family: Parkinsans;
+}
+
+.logo a {
+    color: var(--fifth-color);
+    text-decoration: none;
+}
