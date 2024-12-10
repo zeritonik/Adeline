@@ -3,6 +3,7 @@ import { ErrorsGroup, Form, FormGroup} from './Form'
 
 import { registerUser } from '../api/base'
 
+
 function validateForm(login, password, repeatPassword) {
     if (login === "" || password === "" || repeatPassword === "") {
         return null
