@@ -23,10 +23,10 @@ type User struct {
 }
 
 type Session struct {
-	Astiay_isos *string
-	User_login  *string
-	Creation    *string
-	Expire      *string
+	Astiay_isos *string `json:"Astiay_isos"`
+	User_login  *string `json:"User_login"`
+	Creation    *string `json:"Creation"`
+	Expire      *string `json:"Expire"`
 }
 
 type DatabaseProvider struct {
