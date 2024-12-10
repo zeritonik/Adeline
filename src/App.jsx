@@ -8,10 +8,8 @@ import { loginUser } from "./api/base";
 import MainLayout from './MainPage/MainLayout';
 import MainPageRouter from './MainPage/MainPageRouter';
 
-import ProfileLayout from './ProfilePage/ProfileLayout';
-import ProfilePageRouter from './ProfilePage/ProfilePageRouter';
 
-import TestPageRouter from './TestsPage/TestsPageRouter';
+
 
 import PageNotFound from './PageNotFound';
 
@@ -37,12 +35,6 @@ export default function App() {
                 <Route path="/" element={<MainLayout />} >
                     { MainPageRouter() }
                 </Route>
-                <Route path="/profile" element={<ProfileLayout />} >
-                    { ProfilePageRouter() }
-                </Route>
-                    <Route path="/test-group" element={<ProfileLayout />}>
-                        { TestPageRouter() }
-                    </Route>
                 <Route path="*" element={<PageNotFound />} />
             </Routes>
         </UserContext.Provider>
