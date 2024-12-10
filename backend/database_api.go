@@ -28,7 +28,38 @@ type Session struct {
 	Creation    *string `json:"Creation"`
 	Expire      *string `json:"Expire"`
 }
+type test struct {
+	id             *int
+	input          *string
+	correct_output *string
+	author         *string
+}
 
+type test_result struct {
+	test_id        *int
+	output         *string
+	verdict        *string
+	execution_time *int
+	max_memory     *int
+}
+type test_group struct {
+	id           *int
+	name         *string
+	author       *string
+	tests        *[]test
+	time_limit   *int
+	memory_limit *int
+}
+
+type test_group_result struct {
+	group_id           *int
+	source_code        *string
+	language           *string
+	test_results       *[]test_result
+	verdict            *string
+	max_execution_time *int
+	max_memory         *int
+}
 type DatabaseProvider struct {
 	db *sql.DB
 }

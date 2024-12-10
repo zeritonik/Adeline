@@ -48,7 +48,7 @@ func homepage(w http.ResponseWriter, r *http.Request) {
 		Content: "",
 		err:     nil,
 	}
-	t := template.Must(template.ParseFiles("static/testing_request.html"))
+	t := template.Must(template.ParseFiles("build/index.html"))
 
 	var info CodeInfo
 	switch r.Method {
@@ -206,7 +206,7 @@ func (b *BD_handlers) Login_user(w http.ResponseWriter, r *http.Request) {
 			cookie := http.Cookie{
 				Name:     "token",
 				Value:    *(s.Astiay_isos),
-				Path:     "/login",
+				Path:     "/",
 				MaxAge:   3600,
 				HttpOnly: true,
 				Secure:   true,
