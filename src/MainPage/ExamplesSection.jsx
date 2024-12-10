@@ -1,7 +1,7 @@
 function ExamplesSection() {
     return (
         <section className="section" id="Examples">
-            <h2>Usage examples</h2>
+            <h1 className="section__title">Usage examples</h1>
             <p>
                 Примеры использования
             </p> 

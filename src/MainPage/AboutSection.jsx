@@ -1,7 +1,7 @@
 function AboutSection() {
     return (
         <section className="section" id="About">
-            <h2>About Adeline</h2>
+            <h1 className="section__title">About Adeline</h1>
             <p>
                 Adeline - платформа для удалённой сборки и тестирования проектов и решений
             </p>
