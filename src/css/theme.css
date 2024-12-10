@@ -1,0 +1,23 @@
+@import url('https://fonts.googleapis.com/css2?family=Open+Sans:ital,wght@0,300..800;1,300..800&display=swap'); /* open sans */
+@import url('https://fonts.googleapis.com/css2?family=Parkinsans:wght@300..800&display=swap'); /* parkinsans */
+
+
+html {
+    /* background colors */
+    --main-bg-color: #FFFFFF;
+    --form-bg-color: var(--main-bg-color);
+    --btn-bg-main-color: #6D72C3;
+
+    /* fonts colors */
+    --main-font-color: #483C46;
+    --secondary-font-color: #FFFFFF;
+    --third-font-color: #16C172;
+
+    /* universal colors */
+    --success-color: #16C172;
+    --warning-color: #841C26;
+
+    /* fonts */
+    --main-font: "Open Sans";
+    --secondary-font: "Parkinsans";
+}

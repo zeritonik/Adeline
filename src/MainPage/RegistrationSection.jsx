@@ -1,11 +1,13 @@
-import LoginForm from "../LoginForm";
-import RegistrationForm from "../RegistrationForm";
+import RegistrationForm from "../forms/RegistrationForm";
+import TestCreationForm from "../forms/TestCreationForm";
 
 function RegistrationSection() {
     return (
         <section className="section" id="Registration">
-            <h2>Try it!</h2>
-            <RegistrationForm style={{ width: '50%' }} />
+            <div style={{"width": "40%"}}>
+                <RegistrationForm />
+                <TestCreationForm />
+            </div>
         </section>
     )
 }
