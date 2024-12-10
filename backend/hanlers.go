@@ -31,6 +31,7 @@ func (p *pathResolver) ServeHTTP(res http.ResponseWriter, req *http.Request) {
 	check := req.Method + " " + req.URL.Path
 	for pattern, handlerFunc := range p.handlers {
 		if ok, err := path.Match(pattern, check); ok && err == nil {
+
 			handlerFunc(res, req)
 			return
 		} else if err != nil {
@@ -163,17 +164,24 @@ func (b *BD_handlers) Create_user(w http.ResponseWriter, r *http.Request) {
 	case "POST":
 		decoder := json.NewDecoder(r.Body)
 		err := decoder.Decode(&user)
+		user.Nickname = user.Login //убрать
+		if user.Avatar == nil {
+			user.Avatar = new(string)
+			*user.Avatar = "null"
+		}
 		if err != nil {
 			w.WriteHeader(http.StatusBadRequest)
 			w.Write([]byte(err.Error()))
-		} else if user.Avatar == nil || user.Login == nil || user.Nickname == nil || user.Password == nil {
+		} else if user.Login == nil || user.Nickname == nil || user.Password == nil {
 			w.WriteHeader(http.StatusBadRequest)
 			w.Write([]byte("NO DATA"))
 		} else if err = b.dp.CreateUser(&user); err != nil {
 			w.WriteHeader(http.StatusBadRequest)
 			w.Write([]byte(err.Error()))
+		} else {
+			w.WriteHeader(http.StatusOK)
 		}
-		w.WriteHeader(http.StatusOK)
+
 	}
 
 }
@@ -306,4 +314,15 @@ func (b *BD_handlers) Settings(w http.ResponseWriter, r *http.Request) {
 		w.Write(u)
 
 	}
+}
+
+func HTML(w http.ResponseWriter, r *http.Request) {
+	switch r.Method {
+	case "GET":
+		http.ServeFile(w, r, "./build/index.html")
+	}
+
+}
+func HTML1(w http.ResponseWriter, r *http.Request) {
+	http.ServeFile(w, r, "./build"+r.URL.Path)
 }

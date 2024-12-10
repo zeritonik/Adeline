@@ -32,10 +32,15 @@ func main() {
 	pr := newResolver()
 	pr.Addpath("*/home", homepage)
 	pr.Addpath("*/profile", profilepage)
-	pr.Addpath("*/register", h.Create_user)
-	pr.Addpath("*/login", h.Login_user)
+	pr.Addpath("POST */register", h.Create_user)
+	pr.Addpath("POST */login", h.Login_user)
 	pr.Addpath("*/logout", h.Delete_Session)
 	pr.Addpath("*/profile/setting", h.Settings)
+	pr.Addpath("GET */*/*/*", HTML1)
+	pr.Addpath("GET */*/*", HTML1)
+	pr.Addpath("GET */", HTML)
+	pr.Addpath("GET */register", HTML)
+	pr.Addpath("GET */login", HTML)
 	var port string = ":8080"
 
 	fmt.Println("Server is listening...")

@@ -2,7 +2,6 @@ package main
 
 import (
 	"database/sql"
-	"fmt"
 	"log"
 
 	_ "github.com/lib/pq"
@@ -65,24 +64,24 @@ type DatabaseProvider struct {
 }
 
 func (dp *DatabaseProvider) CreateUser(user *User) (er error) {
-	_, err := dp.db.Exec(fmt.Sprintf("INSERT INTO user_inf(login,nickname,password,avatar) values('%s','%s','%s','%s');",
-		*(user.Login), *(user.Nickname), *(user.Password), *(user.Avatar)))
+	_, err := dp.db.Exec(`INSERT INTO user_inf(login,nickname,password,avatar) values($1,$2,$3,$4);`,
+		*(user.Login), *(user.Nickname), *(user.Password), *(user.Avatar))
 	return err
 }
 
 func (dp *DatabaseProvider) CreateSession(session *Session) (er error) {
-	_, err := dp.db.Exec(fmt.Sprintf("INSERT INTO sessions(astiay_isos,user_login) values('%s','%s');",
-		*(session.Astiay_isos), *(session.User_login)))
+	_, err := dp.db.Exec(`INSERT INTO sessions(astiay_isos,user_login) values($1,$2);`,
+		*(session.Astiay_isos), *(session.User_login))
 	return err
 }
 func (dp *DatabaseProvider) Is_In_Base(login string, password string) (status bool) {
 	var log string
 	var pass string
-	row := dp.db.QueryRow(fmt.Sprintf("SELECT login from user_inf where login = '%s';", login))
+	row := dp.db.QueryRow(`SELECT login from user_inf where login = $1;`, login)
 	if err := row.Scan(&log); err != nil || log != login {
 		return false
 	}
-	row = dp.db.QueryRow(fmt.Sprintf("SELECT password from user_inf where password = '%s';", password))
+	row = dp.db.QueryRow(`SELECT password from user_inf where password = $1;`, password)
 
 	if err := row.Scan(&pass); err != nil || pass != password {
 		return false
@@ -102,11 +101,11 @@ func (dp *DatabaseProvider) Gen_coockie(login string) (coockie string) {
 
 func (dp *DatabaseProvider) Del_session(cookie string) (er error) {
 	var cooki string
-	row := dp.db.QueryRow(fmt.Sprintf("SELECT Astiay_isos from sessions where Astiay_isos = '%s';", cookie))
+	row := dp.db.QueryRow(`SELECT Astiay_isos from sessions where Astiay_isos = $1;`, cookie)
 	if err := row.Scan(&cooki); err != nil || cookie != cookie {
 		return err
 	}
-	_, err := dp.db.Exec(fmt.Sprintf("DELETE FROM sessions WHERE Astiay_isos = '%s';", cookie))
+	_, err := dp.db.Exec(`DELETE FROM sessions WHERE Astiay_isos = $1;`, cookie)
 
 	return err
 }
@@ -117,7 +116,7 @@ func (dp *DatabaseProvider) Del_All_Sessions() (err error) {
 }
 
 func (dp *DatabaseProvider) Get_User(cookie string) (us *User, err error) {
-	row := dp.db.QueryRow(fmt.Sprintf("Select login, avatar, nickname from user_inf where login = (select user_login from sessions where Astiay_isos = '%s');", cookie))
+	row := dp.db.QueryRow(`Select login, avatar, nickname from user_inf where login = (select user_login from sessions where Astiay_isos = $1);`, cookie)
 	if row.Err() != nil {
 		return nil, row.Err()
 	}
@@ -135,7 +134,7 @@ func (dp *DatabaseProvider) Get_User(cookie string) (us *User, err error) {
 }
 
 func (dp *DatabaseProvider) Change_user_avatar(login string, avatar string) (err error) {
-	_, err = dp.db.Exec(fmt.Sprintf("update user_inf set avatar = '%s' where login = '%s'", avatar, login))
+	_, err = dp.db.Exec("update user_inf set avatar = $1 where login = $2", avatar, login)
 	if err != nil {
 		return
 	}
