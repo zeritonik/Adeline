@@ -26,7 +26,6 @@ function HeaderProfileMenu() {
 
 export default function HeaderProfile() {
     const [open, setOpen] = useState(false);
-    console.log("Header profile created")
     return (
         <div className={open ? "header__profile open" : "header__profile"}
              onMouseEnter={() => setOpen(true)} onMouseLeave={() => setOpen(false)}>

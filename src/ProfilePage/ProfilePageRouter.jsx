@@ -5,6 +5,7 @@ import ProfileSettingsPage from "./ProfileSettingsPage";
 
 export default function ProfilePageRouter() {
     return <>
-        <Route index element={<ProfileSettingsPage />} />
+        <Route index element={<ProfilePage />} />
+        <Route path="settings" element={<ProfileSettingsPage />} />
     </>
 }

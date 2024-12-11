@@ -1,9 +1,7 @@
-import { baseUrl } from "./settings"
-
-const profile_url = baseUrl + "/profile"
+import { profile_url, settings_url } from "./settings"
 
 export async function getProfileSettings() {
-    const response = await fetch(profile_url + "/settings", {
+    const response = await fetch(settings_url, {
         method: "GET",
     })
     const json_data = await response.json()
@@ -11,7 +9,7 @@ export async function getProfileSettings() {
 }
 
 export async function postProfileSettings(settings) {
-    const response = await fetch(profile_url + "/settings", {
+    const response = await fetch(settings_url, {
         method: "POST",
         headers: {
             "Content-Type": "application/json",

@@ -11,7 +11,7 @@ export default function LoginForm() {
     const [password, setPassword] = useState('');
     const [form_errors, setFormErrors] = useState(null);
 
-    const [ setUser ] = useContext(UserContext)
+    const [ _, setUser ] = useContext(UserContext)
 
     async function handleSubmit(e) {
         e.preventDefault();
@@ -19,7 +19,7 @@ export default function LoginForm() {
         try {
             const json_data = await loginUser(login, password)
             console.log(json_data)
-            setUser(json_data.login) // set user in context
+            setUser(json_data) // set user in context
         } catch (error) {
             setFormErrors(["Login error: " + error])
         }
@@ -31,11 +31,11 @@ export default function LoginForm() {
             <ErrorsGroup errors={form_errors} />
             <FormGroup>
                 <label className="label" htmlFor="login">Login</label>
-                <input type="text" id="login" className="input" value={login} onChange={e => setLogin(e.target.value)} />
+                <input type="text" id="login" className="input" value={login} onChange={e => setLogin(e.target.value)} required />
             </FormGroup>
             <FormGroup>
                 <label className="label" htmlFor="password">Password</label>
-                <input type="password" id="password" className="input" value={password} onChange={e => setPassword(e.target.value)} />
+                <input type="password" id="password" className="input" value={password} onChange={e => setPassword(e.target.value)} required />
             </FormGroup>
             <button type="submit" className="btn">Login</button>
         </Form>

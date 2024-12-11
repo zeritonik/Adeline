@@ -8,6 +8,11 @@ import { loginUser } from "./api/base";
 import MainLayout from './MainPage/MainLayout';
 import MainPageRouter from './MainPage/MainPageRouter';
 
+import ProfileLayout from './ProfilePage/ProfileLayout';
+import ProfilePageRouter from './ProfilePage/ProfilePageRouter';
+
+import TestsPageRouter from './TestsPage/TestsPageRouter';
+
 
 
 
@@ -23,7 +28,7 @@ export default function App() {
     useEffect(() => { (async () => {
         try {
             const json_data = await loginUser(null, null)
-            setUser(json_data.login)
+            setUser(json_data)
         } catch ( error ) {
             return
         }
@@ -34,6 +39,12 @@ export default function App() {
             <Routes>
                 <Route path="/" element={<MainLayout />} >
                     { MainPageRouter() }
+                </Route>
+                <Route path="/profile" element={<ProfileLayout />} >
+                    { ProfilePageRouter() }
+                </Route>
+                <Route path="/tests" element={<ProfileLayout />} >
+                    { TestsPageRouter() }
                 </Route>
                 <Route path="*" element={<PageNotFound />} />
             </Routes>

@@ -28,6 +28,19 @@ function validateLogin(login) {
     return errors
 }
 
+function validateNickName(nickname) {
+    if (nickname === "") {
+        return null
+    }
+    let errors = []
+    if (nickname.length < 3) {
+        errors.push("Nick name is too short")
+    } else if (nickname.length > 16) {
+        errors.push("Nick name is too long")
+    }
+    return errors
+}
+
 function validatePassword(password) {
     if (password === "") {
         return null
@@ -50,17 +63,18 @@ export default function RegistrationForm() {
     useEffect(() => {setPasswordErrors(validatePassword(password))}, [password])
     const [repeatPassword, setRepeatPassword] = useState('');
 
+    const [nickname, setNickName] = useState('');
+    const [nickname_errors, setNicknameErrors] = useState(null);
+    useEffect(() => {setNicknameErrors(validateNickName(nickname))}, [nickname])
+
     const [form_errors, setFormErrors] = useState(null);
     useEffect(() => {setFormErrors(validateForm(login, password, repeatPassword))}, [login, password, repeatPassword])
 
 
     async function handleSubmit(e) {
         e.preventDefault();
-        if (
-            form_errors === null || login_errors === null || password_errors === null ||
-            form_errors.length > 0 || login_errors.length > 0 || password_errors.length > 0
-        ) {
-            return;
+        if (!form_errors || nickname_errors.length || login_errors.length || password_errors.length || form_errors.length) {
+            return
         }
         try {
             const json_data = await registerUser(login, password)
@@ -77,6 +91,11 @@ export default function RegistrationForm() {
             <label htmlFor="login" className="label">Login:</label>
             <ErrorsGroup errors={login_errors} />
             <input id="login" type="text" className="input" name="login" placeholder="login" value={login} onChange={e => setLogin(e.target.value)} required />
+        </FormGroup>
+        <FormGroup errors={nickname_errors}>
+            <label htmlFor="nickname" className="label">Nick name:</label>
+            <ErrorsGroup errors={nickname_errors} />
+            <input id="nickname" type="text" className="input" name="nickname" placeholder="nickname" value={nickname} onChange={e => setNickName(e.target.value)} required />
         </FormGroup>
         <FormGroup errors={password_errors}>
             <label htmlFor="password" className="label">Password:</label>
