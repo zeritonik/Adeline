@@ -64,7 +64,6 @@ func NewDatabaseProvider(host string, port int, user, password, dbName string) *
 		"password=%s dbname=%s sslmode=disable",
 		host, port, user, password, dbName)
 
-	// Создание соединения с сервером postgres
 	conn, err := sql.Open("postgres", psqlInfo)
 	if err != nil {
 		log.Fatal(err)
