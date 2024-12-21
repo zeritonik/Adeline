@@ -5,14 +5,14 @@ import { UserContext } from "../App";
 
 
 function HeaderProfileMenu() {
-    const [user] = useContext(UserContext);
+    const [user, _] = useContext(UserContext);
 
     if (user) {
         return (
             <ul className="header__profile__menu">
                 <li><Link to="/profile">Profile</Link></li>
                 <li><Link to="/profile/settings">Settings</Link></li>
-                <li><Link to="/logout">Logout</Link></li>
+                <li><Link to="/profile/logout">Logout</Link></li>
             </ul>
         );
     }

@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNext } from "../api/useNext";
 
 import { ErrorsGroup, Form, FormGroup} from './Form'
 
@@ -72,7 +72,7 @@ export default function RegistrationForm() {
     const [form_errors, setFormErrors] = useState(null);
     useEffect(() => {setFormErrors(validateForm(login, password, repeatPassword))}, [login, password, repeatPassword])
 
-    const navigate = useNavigate();
+    const [ next, navigate ] = useNext("/login")
 
 
     async function handleSubmit(e) {
@@ -82,7 +82,7 @@ export default function RegistrationForm() {
         }
         try {
             await registerUser(login, password)
-            navigate("/login")
+            navigate(next)
         } catch (error) {
             setFormErrors(["Registration error " + error])
         }

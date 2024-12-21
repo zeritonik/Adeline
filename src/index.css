@@ -35,6 +35,27 @@ a:hover {
 }
 
 
+/* boxes */
+.box-ok {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--main-font-color);
+    background-color: var(--success-color);
+    border: 1px solid var(--main-font-color);
+    border-radius: 10%;
+}
+.box-warning {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--secondary-font-color);
+    background-color: var(--warning-color);
+    border: 1px solid var(--main-font-color);
+    border-radius: 10%;
+}
+
+
 /* button */
 .btn {
     padding: 0.5rem;
@@ -73,7 +94,7 @@ a:hover {
 
 /* section popup */
 .section-popup {
-    position: fixed;
+    position: absolute;
     width: 40vw;
     
     background-color: var(--main-bg-color);
@@ -237,6 +258,20 @@ a:hover {
     gap: 1rem;
     padding-top: 1rem;
     border-top: 1px solid var(--main-font-color);
+}
+
+
+/* carousel */
+.carousel {
+    width: 100%;
+    
+    overflow: scroll;
+}
+.carousel>ul {
+    width: fit-content;
+    display: flex;
+    gap: 1rem;
+    list-style-type: none;
 }
 
 

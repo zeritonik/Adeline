@@ -1,15 +1,12 @@
 import { useEffect, useState } from "react"
 import { Link } from "react-router-dom"
 
-import { useAnouth} from "../api/useAnouth";
 import TestGroupCreationForm from "../forms/TestGroupCreationForm";
 import { WidgetWithState, NoneState, LoadingState, SuccessState, ErrorState } from "../WidgetWithState"
 import { getTestGroups } from "../api/tests"
 
 
 export default function TestGroupsPage() {
-    useAnouth()
-
     const [test_groups, setTestGroups] = useState([])
     const [new_displayed, setNewDisplayed] = useState(false)
 
@@ -56,7 +53,7 @@ export default function TestGroupsPage() {
                                 <div className="card__content">
                                     <p>time limit: {test_group.time_limit}</p>
                                     <p>memory limit: {test_group.memory_limit}</p>
-                                    <p>tests count: {test_group.tests_count}</p>
+                                    <p>tests count: {test_group.quantity_tests}</p>
                                 </div>
                             </Link>
                         )
