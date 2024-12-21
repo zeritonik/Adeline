@@ -28,6 +28,7 @@ func NewServer(ip string, port int, maxSize int, uc Usecase) *Server {
 	api.server.GET("/api/profile/settings", api.GetSettings)
 	api.server.POST("/api/profile/settings", api.PostSettings)
 	api.server.GET("/api/profile/tests/:id", api.GetTests)
+	api.server.GET("/api/profile/tests", api.GetTests)
 	api.server.DELETE("/api/profile/tests/:id", api.DeleteGroup)
 	api.server.POST("/api/profile/code", api.GetTestGroupRez)
 	api.server.POST("/api/profile/tests", api.PostTests)
