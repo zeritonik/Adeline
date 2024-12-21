@@ -110,3 +110,7 @@ func (u *Usecase) GetTestGroup(id int, login string) (*provider.TestGroup, error
 func (u *Usecase) GetTestGroupwithLogin(login string) ([]provider.TestGroup, error) {
 	return u.p.GetTestGroupInfoLOGIN(login)
 }
+
+func (u *Usecase) DeleteTestGroup(login string, id int) error {
+	return u.p.DeleteTestGroup(id, login)
+}

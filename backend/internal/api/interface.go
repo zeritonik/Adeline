@@ -12,4 +12,5 @@ type Usecase interface {
 	AddTestGroup(tg provider.TestGroup) error
 	GetTestGroup(int, string) (*provider.TestGroup, error)
 	GetTestGroupwithLogin(login string) ([]provider.TestGroup, error)
+	DeleteTestGroup(login string, id int) error
 }
