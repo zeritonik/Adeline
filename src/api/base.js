@@ -8,6 +8,9 @@ export async function registerUser(login, password) {
         },
         body: JSON.stringify({ login, password }),
     })
+    if (response.status !== 200) {
+        throw "Registration error"
+    }
     const json_data = await response.json()
     return json_data
 }
@@ -36,6 +39,9 @@ export async function logoutUser(all=false) {
         },
         body: JSON.stringify({ all }),
     })
+    if (response.status !== 200) {
+        throw "Logout error"
+    }
     const json_data = await response.json()
     return json_data
 }

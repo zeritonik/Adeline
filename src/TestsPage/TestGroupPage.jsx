@@ -29,8 +29,10 @@ export default function TestGroupPage() {
         <section className="section" style={{ width: "66%" }}>
             <WidgetWithState state={state}>
                 <h2 className="section__title">{testGroup.name}</h2>
+                <p>Time limit: {testGroup.time_limit}</p>
+                <p>Memory limit: {testGroup.memory_limit}</p>
                 <div className="card-group" style={{ display: "flex", flexDirection: "column", gap: "1rem"}}>
-                    {testGroup.tests.map((test) => <Test key={test.id} id={test.id} />)}
+                    {testGroup.tests.map((test) => <Test key={test.id} id={test.id} input={test.input} output={test.correct_output} />)}
                 </div>
             </WidgetWithState>
         </section>
@@ -38,7 +40,7 @@ export default function TestGroupPage() {
 }
 
 
-function Test({ id, input, output, onDelete }) {
+function Test({ id, input, output }) {
     const [ open, setOpen ] = useState(false);
 
     return (

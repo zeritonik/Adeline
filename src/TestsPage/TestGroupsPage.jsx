@@ -53,7 +53,7 @@ export default function TestGroupsPage() {
                                 <div className="card__content">
                                     <p>time limit: {test_group.time_limit}</p>
                                     <p>memory limit: {test_group.memory_limit}</p>
-                                    <p>tests count: {test_group.tests_count}</p>
+                                    <p>tests count: {test_group.quantity_tests}</p>
                                 </div>
                             </Link>
                         )
