@@ -182,7 +182,7 @@ func (dp *DatabaseProvider) InsertTestGroupRezult(tg TestGroupResult) (error, ma
 }
 
 func (dp *DatabaseProvider) GetTestGroupResultInfo(id int, login string) (*TestGroup, error) {
-	tg := TestGroup{Id: new(int), Name: new(string), Time_limit: new(int), Memory_limit: new(int), Author: new(string), Tests: *new([]Test)}
+	tg := TestGroupResult{group_id: new(int), source_code: new(string), language: new(string)}
 	var r []string
 	row := dp.db.QueryRow(`select id,name,author,time_limit,memory_limit,tests from test_group where id = $1 and author = $2;`, id, login)
 	if err := row.Scan(tg.Id, tg.Name, tg.Author, tg.Time_limit, tg.Memory_limit, pq.Array(&r)); err != nil {
