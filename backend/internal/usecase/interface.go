@@ -8,7 +8,7 @@ type DatabaseProvider interface {
 	CreateUser(provider.User) error
 	CreateSession(string, string) error
 	DelSession(string) error
-	DelAllSessions() error
+	DelAllSessions(string) error
 	GetUserInf(string) (*provider.UserInf, error)
 	GetSession(string) (bool, error)
 	ChangeUserAvatar(string, string) error

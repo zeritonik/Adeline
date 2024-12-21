@@ -21,8 +21,10 @@ func (srv *Server) PostCreateUser(c echo.Context) error {
 	if err := srv.uc.CreateUser(user); err != nil {
 		return c.String(http.StatusInternalServerError, err.Error())
 	}
-
-	return c.String(http.StatusOK, "Registered")
+	rez := struct {
+		Ans string `json:"ans"`
+	}{Ans: "Registered"}
+	return c.JSON(http.StatusOK, rez)
 }
 
 func (srv *Server) PostLogin(c echo.Context) error {
@@ -78,16 +80,29 @@ func (srv *Server) GetSettings(c echo.Context) error {
 }
 func (srv *Server) PostLogout(c echo.Context) error {
 	s := struct {
-		All     *bool
-		Cookies []string
+		All *bool `json:"all"`
 	}{}
+	rez := struct {
+		Ans string `json:"ans"`
+	}{}
+	cookie, err := c.Cookie("astiay_isos")
+	if err != nil {
+		rez.Ans = err.Error()
+		return c.JSON(http.StatusInternalServerError, rez)
+	}
+	user, err := srv.uc.GetUser(cookie.Value)
+	if err != nil {
+		rez.Ans = err.Error()
+		return c.JSON(http.StatusInternalServerError, rez)
+	}
 	if err := c.Bind(&s); err != nil {
 		return c.String(http.StatusInternalServerError, err.Error())
 	}
-	if err := srv.uc.DelSession(s.Cookies, *s.All); err != nil {
+	if err := srv.uc.DelSession(*user.Login, cookie.Value, *s.All); err != nil {
 		return c.String(http.StatusInternalServerError, err.Error())
 	}
-	return c.String(http.StatusOK, "")
+	rez.Ans = "DELETED"
+	return c.JSON(http.StatusOK, rez)
 }
 
 func (srv *Server) PostSettings(c echo.Context) error {
@@ -136,6 +151,20 @@ func (srv *Server) PostTests(c echo.Context) error {
 	if err := srv.uc.AddTestGroup(tg); err != nil {
 		return c.String(http.StatusInternalServerError, err.Error())
 	}
+	rez := struct {
+		Id           *int    `json:"id"`
+		Name         *string `json:"name"`
+		Author       *string `json:"author"`
+		Kolvo        *int    `json:"quantityOfTests"`
+		Time_limit   *int    `json:"time_limit"`
+		Memory_limit *int    `json:"memory_limit"`
+	}{Id: new(int), Name: new(string), Author: new(string), Kolvo: new(int), Time_limit: new(int), Memory_limit: new(int)}
+	*(rez.Author) = *(tg.Author)
+	*(rez.Memory_limit) = *(tg.Memory_limit)
+	*(rez.Kolvo) = (len(tg.Tests))
+	*(rez.Time_limit) = *(tg.Time_limit)
+	*(rez.Name) = *(tg.Name)
+	*(rez.Id) = *(tg.Id)
 
 	return c.JSON(http.StatusCreated, tg)
 }
@@ -168,22 +197,8 @@ func (srv *Server) GetTests(c echo.Context) error {
 		if tg == nil {
 			return c.String(http.StatusBadRequest, "No data to this user")
 		}
-		u := struct {
-			Id           *int    `json:"id"`
-			Memory_limit *int    `json:"memory_limit"`
-			Time_limit   *int    `json:"time_limit"`
-			Kolvo        *int    `json:"quantity_tests"`
-			Author       *string `json:"author"`
-			Name         *string `json:"name"`
-		}{Memory_limit: new(int), Time_limit: new(int), Kolvo: new(int), Author: new(string), Name: new(string), Id: new(int)}
-		*(u.Memory_limit) = *(tg.Memory_limit)
-		*(u.Time_limit) = *(tg.Time_limit)
-		*(u.Author) = *(tg.Author)
-		*(u.Kolvo) = len(tg.Tests)
-		*(u.Name) = *(tg.Name)
-		*(u.Id) = *(tg.Id)
 
-		return c.JSON(http.StatusOK, u)
+		return c.JSON(http.StatusOK, tg)
 	}
 	tgs, err := srv.uc.GetTestGroupwithLogin(*user.Login)
 	if err != nil {

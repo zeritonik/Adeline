@@ -1,8 +1,8 @@
 ip: "127.0.0.1"
 port: 8080
 db:
-  host: "localhost"
+  host: "46.19.67.80"
   port: 5432
-  user: "maksim"
-  password: "123"
+  user: "maks"
+  password: "YaEmo123!"
   dbname: "adeline"

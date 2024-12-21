@@ -40,17 +40,17 @@ func (dp *DatabaseProvider) Gen_coockie(login string) (coockie string) {
 }
 
 func (dp *DatabaseProvider) DelSession(cookie string) (er error) {
-	var cooki string
-	row := dp.db.QueryRow(`SELECT Astiay_isos from sessions where Astiay_isos = $1;`, cookie)
-	if err := row.Scan(&cooki); err != nil {
-		return err
-	}
-	_, err := dp.db.Exec(`DELETE FROM sessions WHERE Astiay_isos = $1;`, cookie)
+	// var cooki string
+	// row := dp.db.QueryRow(`SELECT astiay_isos from sessions where astiay_isos = $1;`, cookie)
+	// if err := row.Scan(&cooki); err != nil {
+	// 	return err
+	// }
+	_, err := dp.db.Exec(`DELETE FROM sessions WHERE astiay_isos = $1;`, cookie)
 	return err
 }
 
-func (dp *DatabaseProvider) DelAllSessions() (err error) {
-	_, err = dp.db.Exec("truncate sessions;")
+func (dp *DatabaseProvider) DelAllSessions(login string) (err error) {
+	_, err = dp.db.Exec("DELETE FROM sessions WHERE user_login = $1;", login)
 	return err
 }
 

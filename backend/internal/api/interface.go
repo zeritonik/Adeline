@@ -5,7 +5,7 @@ import "adeline/backend/internal/provider"
 type Usecase interface {
 	CreateUser(provider.User) error
 	LoginUser(string, string) (string, error)
-	DelSession([]string, bool) error
+	DelSession(string, string, bool) error
 	GetUser(string) (*provider.UserInf, error)
 	ChangeSettings(*string, *string, *string, *string, string) error
 	CheckSession(string) (bool, error)

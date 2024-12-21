@@ -65,14 +65,12 @@ func (u *Usecase) GetUser(cookie string) (*provider.UserInf, error) {
 	return u.p.GetUserInf(cookie)
 }
 
-func (u *Usecase) DelSession(cookies []string, all bool) error {
-	if all == true {
-		return u.p.DelAllSessions()
+func (u *Usecase) DelSession(login string, cookie string, all bool) error {
+	if all {
+		return u.p.DelAllSessions(login)
 	}
-	for _, val := range cookies {
-		if err := u.p.DelSession(val); err != nil {
-			return err
-		}
+	if err := u.p.DelSession(cookie); err != nil {
+		return err
 	}
 	return nil
 }
