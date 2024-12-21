@@ -1,10 +1,9 @@
-import { useNavigate, useParams } from "react-router-dom"
+import { useNavigate, useSearchParams } from "react-router-dom"
 
 export function useNext(next="/") {
-    const params = useParams()
+    const [params] = useSearchParams()
     const navigate = useNavigate()
 
-    console.log(params.next)
-    next = params.next ? params.next : next
+    next = params.get("next") ? params.get("next") : next
     return [ next, navigate ]
 }
