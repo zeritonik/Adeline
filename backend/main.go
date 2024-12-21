@@ -9,10 +9,10 @@ import (
 )
 
 const (
-	host     = "46.19.67.80"
+	host     = "localhost"
 	port     = 5432
-	user     = "maks"
-	password = "YaEmo123!"
+	user     = "maksim"
+	password = "123"
 	dbname   = "adeline"
 )
 
@@ -30,17 +30,21 @@ func main() {
 
 	h := BD_handlers{dp: dp}
 	pr := newResolver()
-	pr.Addpath("*/home", homepage)
-	pr.Addpath("*/profile", profilepage)
-	pr.Addpath("POST */register", h.Create_user)
-	pr.Addpath("POST */login", h.Login_user)
-	pr.Addpath("*/logout", h.Delete_Session)
-	pr.Addpath("*/profile/setting", h.Settings)
-	pr.Addpath("GET */*/*/*", HTML1)
-	pr.Addpath("GET */*/*", HTML1)
-	pr.Addpath("GET */", HTML)
-	pr.Addpath("GET */register", HTML)
-	pr.Addpath("GET */login", HTML)
+
+	pr.Addpath("POST */api/register", h.Create_user)
+	pr.Addpath("POST */api/login", h.Login_user)
+	pr.Addpath("POST */api/logout", h.Delete_Session_Post)
+	pr.Addpath("POST */api/profile/settings", h.Post_Settings)
+	pr.Addpath("GET */api/profile/settings", h.Get_Settings)
+	pr.Addpath("GET */static/*/*", get_Static)
+	pr.Addpath("GET */static/*", get_Static)
+	pr.Addpath("GET */profile/settings", get_HTML)
+	pr.Addpath("GET */", get_HTML)
+	pr.Addpath("GET */register", get_HTML)
+	pr.Addpath("GET */login", get_HTML)
+	pr.Addpath("GET */profile", get_HTML)
+	pr.Addpath("GET */profile/settings", get_HTML)
+
 	var port string = ":8080"
 
 	fmt.Println("Server is listening...")

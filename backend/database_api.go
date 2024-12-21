@@ -1,11 +1,20 @@
 package main
 
 import (
+	"crypto/sha256"
 	"database/sql"
+	"fmt"
 	"log"
 
 	_ "github.com/lib/pq"
 )
+
+func hash(value string) string {
+	h := sha256.New()
+	h.Write([]byte(value))
+
+	return fmt.Sprintf("%x", h.Sum(nil))
+}
 
 type Conn_inf struct {
 	Host     string
@@ -64,8 +73,10 @@ type DatabaseProvider struct {
 }
 
 func (dp *DatabaseProvider) CreateUser(user *User) (er error) {
+	pass := hash(*(user.Password))
+
 	_, err := dp.db.Exec(`INSERT INTO user_inf(login,nickname,password,avatar) values($1,$2,$3,$4);`,
-		*(user.Login), *(user.Nickname), *(user.Password), *(user.Avatar))
+		*(user.Login), *(user.Nickname), pass, *(user.Avatar))
 	return err
 }
 
@@ -77,16 +88,13 @@ func (dp *DatabaseProvider) CreateSession(session *Session) (er error) {
 func (dp *DatabaseProvider) Is_In_Base(login string, password string) (status bool) {
 	var log string
 	var pass string
-	row := dp.db.QueryRow(`SELECT login from user_inf where login = $1;`, login)
-	if err := row.Scan(&log); err != nil || log != login {
+	row := dp.db.QueryRow(`SELECT login, password from user_inf where login = $1 and password = $2;`, login, hash(password))
+	if err := row.Scan(&log, &pass); err != nil || log != login || pass != hash(password) {
+		fmt.Println(hash(password))
+		fmt.Println(pass)
 		return false
 	}
-	row = dp.db.QueryRow(`SELECT password from user_inf where password = $1;`, password)
 
-	if err := row.Scan(&pass); err != nil || pass != password {
-		return false
-
-	}
 	return true
 }
 func (dp *DatabaseProvider) Gen_coockie(login string) (coockie string) {
@@ -115,28 +123,55 @@ func (dp *DatabaseProvider) Del_All_Sessions() (err error) {
 	return
 }
 
-func (dp *DatabaseProvider) Get_User(cookie string) (us *User, err error) {
+func (dp *DatabaseProvider) Get_User(cookie string) (user *User, err error) {
 	row := dp.db.QueryRow(`Select login, avatar, nickname from user_inf where login = (select user_login from sessions where Astiay_isos = $1);`, cookie)
 	if row.Err() != nil {
 		return nil, row.Err()
 	}
-	user := User{}
 	var l, a, n string
 	if err := row.Scan(&l, &a, &n); err != nil {
 		return nil, err
 	}
-	user.Login = &l
-	user.Avatar = &a
-	user.Nickname = &n
+	u := User{Login: new(string), Nickname: new(string), Password: new(string), Avatar: new(string)}
 
-	return &user, nil
+	*(u.Login) = l
+	*(u.Avatar) = a
+	*(u.Nickname) = n
+	return &u, nil
 
 }
 
 func (dp *DatabaseProvider) Change_user_avatar(login string, avatar string) (err error) {
-	_, err = dp.db.Exec("update user_inf set avatar = $1 where login = $2", avatar, login)
+	_, err = dp.db.Exec(`update user_inf set avatar = $1 where login = $2`, avatar, login)
 	if err != nil {
 		return
+	}
+	return nil
+}
+func (dp *DatabaseProvider) IsSessionActive(cookie string) bool {
+	row := dp.db.QueryRow(`select astiay_isos from sessions where astiay_isos = $1`, cookie)
+	var r string
+	if err := row.Scan(&r); err != nil {
+		return false
+	}
+	if r != cookie {
+		return false
+	}
+	return true
+}
+
+func (dp *DatabaseProvider) ChangeUserPassword(login string, password string) error {
+	pass := hash(password)
+	_, err := dp.db.Exec(`update user_inf set password = $1 where login = $2`, pass, login)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+func (dp *DatabaseProvider) ChangeUserNick(login string, nickname string) error {
+	_, err := dp.db.Exec(`update user_inf set nickname = $1 where login = $2`, nickname, login)
+	if err != nil {
+		return err
 	}
 	return nil
 }
