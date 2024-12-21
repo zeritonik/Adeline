@@ -19,4 +19,5 @@ type DatabaseProvider interface {
 	InsertTestGroup(tg provider.TestGroup) (error, map[provider.Test]error)
 	GetTestGroupInfo(id int, login string) (*provider.TestGroup, error)
 	GetTestGroupInfoLOGIN(login string) ([]provider.TestGroup, error)
+	DeleteTestGroup(id int, login string) error
 }

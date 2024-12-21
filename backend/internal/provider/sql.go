@@ -181,6 +181,13 @@ func (dp *DatabaseProvider) InsertTestGroupRezult(tg TestGroupResult) (error, ma
 	return nil, e
 }
 
+func (dp *DatabaseProvider) DeleteTestGroup(id int, login string) error {
+	if _, err := dp.db.Exec(`delete from test_group where author = $1 and id = $2`, login, id); err != nil {
+		return err
+	}
+	return nil
+}
+
 // func (dp *DatabaseProvider) GetTestGroupResultInfo(id int, login string) (*TestGroup, error) {
 // 	tg := TestGroupResult{group_id: new(int), source_code: new(string), language: new(string)}
 // 	var r []string
