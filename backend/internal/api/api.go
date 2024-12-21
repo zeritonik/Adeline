@@ -33,6 +33,7 @@ func NewServer(ip string, port int, maxSize int, uc Usecase) *Server {
 	api.server.POST("/api/profile/code", api.GetTestGroupRez)
 	api.server.POST("/api/profile/tests", api.PostTests)
 	api.server.POST("/api/profile/logout", api.PostLogout)
+	api.server.GET("/api/profile/results", api.GetResults)
 	api.server.File("*/", "./build/index.html")
 	api.server.Static("/static/*", "./build/static")
 	api.address = fmt.Sprintf("%s:%d", ip, port)

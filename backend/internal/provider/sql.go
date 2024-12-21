@@ -1,6 +1,7 @@
 package provider
 
 import (
+	"fmt"
 	"log"
 	"strconv"
 	"strings"
@@ -163,23 +164,23 @@ func (dp *DatabaseProvider) GetTestGroupInfoLOGIN(login string) ([]TestGroup, er
 	return arrtg, nil
 }
 
-func (dp *DatabaseProvider) InsertTestGroupRezult(tg TestGroupResult) (error, map[TestResult]error) {
-	var id int
-	row := dp.db.QueryRow(`insert into test_group_result (group_id,source_code,language,verdict,max_execution_time,max_memory) values ($1,$2,$3,$4,$5,$6) returning id;`, tg.group_id, tg.source_code, tg.language, tg.verdict, tg.max_execution_time, tg.max_memory)
-	if err := row.Scan(&id); err != nil {
-		return err, nil
-	}
+// func (dp *DatabaseProvider) InsertTestGroupRezult(tg TestGroupResult) (error, map[TestResult]error) {
+// 	var id int
+// 	row := dp.db.QueryRow(`insert into test_group_result (group_id,source_code,language,verdict,max_execution_time,max_memory) values ($1,$2,$3,$4,$5,$6) returning id;`, tg.Group_id, tg.Source_code, tg.Language, tg.Verdict, tg.Max_execution_time, tg.Max_memory)
+// 	if err := row.Scan(&id); err != nil {
+// 		return err, nil
+// 	}
 
-	e := make(map[TestResult]error)
-	for _, val := range *tg.test_results {
-		if _, err := dp.db.Exec(`update test_group set tests = array_append(tests,($1,$2,$3,$4,$5)::test_result) where id = $6 `, val.test_id, val.output, val.execution_time, val.verdict, val.max_memory, id); err != nil {
-			e[val] = err
-		} else {
-			e[val] = nil
-		}
-	}
-	return nil, e
-}
+// 	e := make(map[TestResult]error)
+// 	for _, val := range *tg.Test_results {
+// 		if _, err := dp.db.Exec(`update test_group set tests = array_append(tests,($1,$2,$3,$4,$5)::test_result) where id = $6 `, val.Test_id, val.Output, val.Execution_time, val.Verdict, val.Max_memory, id); err != nil {
+// 			e[val] = err
+// 		} else {
+// 			e[val] = nil
+// 		}
+// 	}
+// 	return nil, e
+// }
 
 func (dp *DatabaseProvider) DeleteTestGroup(id int, login string) error {
 	if _, err := dp.db.Exec(`delete from test_group where author = $1 and id = $2`, login, id); err != nil {
@@ -188,23 +189,39 @@ func (dp *DatabaseProvider) DeleteTestGroup(id int, login string) error {
 	return nil
 }
 
-// func (dp *DatabaseProvider) GetTestGroupResultInfo(id int, login string) (*TestGroup, error) {
-// 	tg := TestGroupResult{group_id: new(int), source_code: new(string), language: new(string)}
-// 	var r []string
-// 	row := dp.db.QueryRow(`select id,name,author,time_limit,memory_limit,tests from test_group where id = $1 and author = $2;`, id, login)
-// 	if err := row.Scan(tg.Id, tg.Name, tg.Author, tg.Time_limit, tg.Memory_limit, pq.Array(&r)); err != nil {
-// 		return nil, err
-// 	}
-// 	for i, val := range r {
-// 		rez := strings.Split(val, ",")
-// 		tg.Tests = append(tg.Tests, Test{Id: new(int), Input: new(string), Correct_output: new(string)})
-// 		id, _ = (strconv.Atoi(strings.Trim(rez[0], "(")))
-// 		tg.Tests[i].Id = &id
-// 		input := strings.Trim(rez[1], "\"")
-// 		tg.Tests[i].Input = &input
-// 		output := strings.Trim(strings.Trim(rez[2], ")"), "\"")
-// 		tg.Tests[i].Correct_output = &output
-// 	}
+func (dp *DatabaseProvider) GetTestGroupResultInfo(login string) (*Rez, error) {
+	tg := TestGroupResult{Group_id: new(int), Source_code: new(string), Language: new(string), Id: new(int), Max_execution_time: new(int), Verdict: new(string), Max_memory: new(int)}
+	var r []string
+	row := dp.db.QueryRow(`select test_group_result.id,language,max_execution_time, max_memory,source_code,test_results from test_group_result inner join test_group on group_id = test_group.id where author = $1 and test_group_result.id = 3;`, login)
+	if err := row.Scan(tg.Id, tg.Language, tg.Max_execution_time, tg.Max_memory, tg.Source_code, pq.Array(&r)); err != nil {
+		fmt.Println(err.Error())
+		return nil, err
+	}
+	fmt.Println(r)
+	re := Rez{Group_id: new(int), Source_code: new(string), Language: new(string), Id: new(int), Max_execution_time: new(int), Verdict: new(string), Max_memory: new(int)}
+	re.Test_results = make([]string, 0)
+	*(re.Id) = *(tg.Id)
+	*(re.Group_id) = *(tg.Group_id)
+	*(re.Max_execution_time) = *(tg.Max_execution_time)
+	*(re.Max_memory) = *(tg.Max_memory)
+	*(re.Language) = *(tg.Language)
+	for i, val := range r {
+		rez := strings.Split(val, ",")
+		tg.Test_results = append(tg.Test_results, TestResult{Test_id: new(int), Output: new(string), Verdict: new(string), Execution_time: new(int), Max_memory: new(int)})
+		*(tg.Test_results[i].Test_id), _ = strconv.Atoi(strings.Trim(rez[0], "("))
+		*(tg.Test_results[i].Output) = rez[1]
+		*(tg.Test_results[i].Verdict) = rez[2]
+		*(tg.Test_results[i].Max_memory), _ = strconv.Atoi(rez[3])
+		*(tg.Test_results[i].Execution_time), _ = strconv.Atoi(strings.Trim(rez[4], ")"))
+		re.Test_results = append(re.Test_results, rez[2])
 
-// 	return &tg, nil
-// }
+		// id, _ = (strconv.Atoi(strings.Trim(rez[0], "(")))
+		// tg.Test_results[i].Test_id = &id
+		// input := strings.Trim(rez[1], "\"")
+		// tg.Test_results[i].Input = &input
+		// output := strings.Trim(strings.Trim(rez[2], ")"), "\"")
+		// tg.Tests[i].Correct_output = &output
+	}
+
+	return &re, nil
+}

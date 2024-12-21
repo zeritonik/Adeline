@@ -13,4 +13,5 @@ type Usecase interface {
 	GetTestGroup(int, string) (*provider.TestGroup, error)
 	GetTestGroupwithLogin(login string) ([]provider.TestGroup, error)
 	DeleteTestGroup(login string, id int) error
+	GetTestGroupResult(login string) (*provider.Rez, error)
 }

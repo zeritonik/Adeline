@@ -30,10 +30,14 @@ func (srv *Server) PostCreateUser(c echo.Context) error {
 func (srv *Server) PostLogin(c echo.Context) error {
 	user := provider.User{Login: new(string), Password: new(string)}
 	cook, err := c.Cookie("astiay_isos")
+	rez := struct {
+		Ans string `json:"ans"`
+	}{}
 	if err == nil {
 		check, err := srv.uc.CheckSession(cook.Value)
 		if err != nil {
-			return c.String(http.StatusInternalServerError, err.Error())
+			rez.Ans = err.Error()
+			return c.JSON(http.StatusInternalServerError, rez)
 		}
 		if check {
 			return c.JSON(http.StatusOK, user)
@@ -164,9 +168,8 @@ func (srv *Server) PostTests(c echo.Context) error {
 	*(rez.Kolvo) = (len(tg.Tests))
 	*(rez.Time_limit) = *(tg.Time_limit)
 	*(rez.Name) = *(tg.Name)
-	*(rez.Id) = *(tg.Id)
 
-	return c.JSON(http.StatusCreated, tg)
+	return c.JSON(http.StatusCreated, rez)
 }
 
 func (srv *Server) GetTests(c echo.Context) error {
@@ -312,6 +315,30 @@ func (srv *Server) DeleteGroup(c echo.Context) error {
 	return c.JSON(http.StatusOK, "Deleted")
 }
 
+func (srv *Server) GetResults(c echo.Context) error {
+	cookie, err := c.Cookie("astiay_isos")
+	if err != nil {
+		return c.String(http.StatusInternalServerError, err.Error())
+	}
+	f, err := srv.uc.CheckSession(cookie.Value)
+	if err != nil {
+		return c.String(http.StatusInternalServerError, err.Error())
+	}
+	if !f {
+		return c.String(401, "")
+	}
+	user, err := srv.uc.GetUser(cookie.Value)
+	if err != nil {
+		return c.String(http.StatusInternalServerError, err.Error())
+	}
+	tgr, err := srv.uc.GetTestGroupResult(*user.Login)
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, err.Error())
+	}
+
+	return c.JSON(http.StatusOK, tgr)
+
+}
 func ExecutePython(id int, code string, input string) (string, error) {
 	cmd := exec.Command("python3", "backend/tests/prog"+strconv.Itoa(id)+".py")
 	var out bytes.Buffer

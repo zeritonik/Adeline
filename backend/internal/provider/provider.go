@@ -6,6 +6,16 @@ import (
 	"log"
 )
 
+type Rez struct {
+	Id                 *int     `json:"id"`
+	Group_id           *int     `json:"group_id"`
+	Source_code        *string  `json:"code"`
+	Language           *string  `json:"language"`
+	Test_results       []string `json:"results"`
+	Verdict            *string  `json:"verdict"`
+	Max_execution_time *int     `json:"max_exec_time"`
+	Max_memory         *int     `json:"max_memory"`
+}
 type UserInf struct {
 	Login    *string `json:"login"`
 	Nickname *string `json:"nickname"`
@@ -31,11 +41,11 @@ type Test struct {
 }
 
 type TestResult struct {
-	test_id        *int
-	output         *string
-	verdict        *string
-	execution_time *int
-	max_memory     *int
+	Test_id        *int    `json:"test_id"`
+	Output         *string `json:"output"`
+	Verdict        *string `json:"verdict"`
+	Execution_time *int    `json:"execution_time"`
+	Max_memory     *int    `json:"max_memory"`
 }
 type TestGroup struct {
 	Id           *int    `json:"id"`
@@ -47,13 +57,14 @@ type TestGroup struct {
 }
 
 type TestGroupResult struct {
-	group_id           *int
-	source_code        *string
-	language           *string
-	test_results       *[]TestResult
-	verdict            *string
-	max_execution_time *int
-	max_memory         *int
+	Id                 *int         `json:"id"`
+	Group_id           *int         `json:"group_id"`
+	Source_code        *string      `json:"code"`
+	Language           *string      `json:"language"`
+	Test_results       []TestResult `json:"test_results"`
+	Verdict            *string      `json:"verdict"`
+	Max_execution_time *int         `json:"max_exec_time"`
+	Max_memory         *int         `json:"max_memory"`
 }
 type DatabaseProvider struct {
 	db *sql.DB
