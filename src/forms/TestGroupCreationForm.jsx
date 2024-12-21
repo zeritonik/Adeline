@@ -1,6 +1,8 @@
 import { useState, useEffect } from "react";
 import { Form, FormGroup, ErrorsGroup } from "./Form"
-import { createGroupTest } from "../api/tests";
+
+import { useAnouth } from "../api/useAnouth";
+import { createTestGroup } from "../api/tests";
 
 function validateName(name) {
     if (name === "") {
@@ -46,7 +48,9 @@ function validateMemoryLimit(memory_limit) {
 }
 
 
-export default function GroupTestCreationForm() {
+export default function TestGroupCreationForm( {onSuccess=() => {}, onError=() => {}} ) {
+    useAnouth()
+
     const [name, setName] = useState('');
     const [name_errors, setNameErrors] = useState(null);
     useEffect(() => {setNameErrors(validateName(name))}, [name])
@@ -68,10 +72,11 @@ export default function GroupTestCreationForm() {
             return
         }
         try {
-            const json_data = await createGroupTest(name, parseInt(time_limit), parseInt(memory_limit))
-            console.log(json_data) // TODO handle response
+            const json_data = await createTestGroup(name, parseInt(time_limit), parseInt(memory_limit))
+            onSuccess(json_data)
         } catch (error) {
             setFormErrors(["Creation error " + error])
+            onError()
         }
     }
 

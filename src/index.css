@@ -19,6 +19,12 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 
+/* clickable */
+.clickable {
+    cursor: pointer;
+}
+
+
 /* a */
 a {
     color: var(--main-font-color);
@@ -63,6 +69,22 @@ a:hover {
 }
 .section__title {
     font-size: 2rem;
+}
+
+/* section popup */
+.section-popup {
+    position: fixed;
+    width: 40vw;
+    
+    background-color: var(--main-bg-color);
+}
+
+.section-popup__close {
+    position: absolute; 
+    top: 2rem;
+    right: 2rem;
+    width: 2rem;
+    height: 2rem;
 }
 
 
@@ -181,4 +203,47 @@ a:hover {
     align-items: center;
 
     color: var(--warning-color)
+}
+
+
+/* card */
+.card-group {
+    display: grid;
+    justify-content: center;
+    width: 100%;
+
+    grid-auto-rows: 1fr;
+}
+
+.card {
+    display: flex;
+    flex-direction: column;
+
+    gap: 1rem;
+
+    padding: 1rem;
+    border: 1px solid var(--main-font-color);
+    border-radius: 1rem;
+    box-shadow: 0 0 0.5rem var(--main-font-color);
+}
+
+.card__title {
+    text-align: center;
+}
+
+.card__content {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    padding-top: 1rem;
+    border-top: 1px solid var(--main-font-color);
+}
+
+
+/* pagination */
+.pagination {
+    display: flex;
+    justify-content: center;
+    gap: 0.5rem;
+    list-style-type: none;
 }

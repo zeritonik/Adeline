@@ -1,4 +1,4 @@
-import { register_url, login_url } from "./settings"
+import { register_url, login_url, logout_url } from "./settings"
 
 export async function registerUser(login, password) {
     const response = await fetch(register_url, {
@@ -19,6 +19,18 @@ export async function loginUser(login, password) {
             "Content-Type": "application/json",
         },
         body: JSON.stringify({ login, password }),
+    })
+    const json_data = await response.json()
+    return json_data
+}
+
+export async function logoutUser(all) {
+    const response = await fetch(logout_url, {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ all }),
     })
     const json_data = await response.json()
     return json_data

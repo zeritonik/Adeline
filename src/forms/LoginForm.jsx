@@ -1,4 +1,5 @@
 import { useState, useContext } from "react";
+import { useNavigate, useSearchParams } from "react-router-dom"
 
 import { ErrorsGroup, Form, FormGroup } from "./Form";
 import { loginUser } from "../api/base";
@@ -11,14 +12,20 @@ export default function LoginForm() {
     const [password, setPassword] = useState('');
     const [form_errors, setFormErrors] = useState(null);
 
-    const [ _, setUser ] = useContext(UserContext)
+    const [ user, setUser ] = useContext(UserContext)
+
+    const [searchParams] = useSearchParams();
+    const navigate = useNavigate();
+
+    if (user) {
+        navigate(searchParams.get("next") || "/profile")
+    }
 
     async function handleSubmit(e) {
         e.preventDefault();
         
         try {
             const json_data = await loginUser(login, password)
-            console.log(json_data)
             setUser(json_data) // set user in context
         } catch (error) {
             setFormErrors(["Login error: " + error])

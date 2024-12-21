@@ -1,4 +1,4 @@
-import { profile_url, settings_url } from "./settings"
+import { settings_url } from "./settings"
 
 export async function getProfileSettings() {
     const response = await fetch(settings_url, {
@@ -19,3 +19,4 @@ export async function postProfileSettings(settings) {
     const json_data = await response.json()
     return json_data
 }
+

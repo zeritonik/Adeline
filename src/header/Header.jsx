@@ -35,7 +35,7 @@ export function ProfileHeader() {
     return (
         <header className="header">
         <ul className="header__item header__navigation">
-            <li><Link to="">Tests</Link></li>
+            <li><Link to="/profile/tests">Your test groups</Link></li>
             <li><Link to="">Tests</Link></li>
             <li><Link to="">Tests</Link></li>
         </ul>

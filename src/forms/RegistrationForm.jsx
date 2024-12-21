@@ -1,4 +1,6 @@
 import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+
 import { ErrorsGroup, Form, FormGroup} from './Form'
 
 import { registerUser } from '../api/base'
@@ -70,6 +72,8 @@ export default function RegistrationForm() {
     const [form_errors, setFormErrors] = useState(null);
     useEffect(() => {setFormErrors(validateForm(login, password, repeatPassword))}, [login, password, repeatPassword])
 
+    const navigate = useNavigate();
+
 
     async function handleSubmit(e) {
         e.preventDefault();
@@ -77,8 +81,8 @@ export default function RegistrationForm() {
             return
         }
         try {
-            const json_data = await registerUser(login, password)
-            console.log(json_data) // TODO handle response
+            await registerUser(login, password)
+            navigate("/login")
         } catch (error) {
             setFormErrors(["Registration error " + error])
         }

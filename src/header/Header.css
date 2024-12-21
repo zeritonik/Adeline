@@ -35,7 +35,12 @@
     position: absolute;
     list-style: none;
 
-    padding: 0.5rem;
+    height: 100vh;
+
+    right: 0;
+    top: 0;
+
+    padding: 6rem 3rem;
 
     background-color: var(--main-bg-color);
     box-shadow: 0 0 0.5rem var(--main-font-color);

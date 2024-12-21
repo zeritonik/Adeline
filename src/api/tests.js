@@ -1,7 +1,8 @@
-import { tests_url } from "./settings"
+import { profile_tests_url } from "./settings"
+
 
 export async function createTest(input, correctOutput) {
-    const response = await fetch(tests_url, {
+    const response = await fetch(profile_tests_url, {
         method: "POST",
         headers: {
             "Content-Type": "application/json",
@@ -12,13 +13,12 @@ export async function createTest(input, correctOutput) {
             correctOutput 
         }),
     })
-    const json_data = await response.json()
-    return json_data
+    return await response.json()
 }
 
 
-export async function createGroupTest(name, time_limit, memory_limit) {
-    const response = await fetch(tests_url, {
+export async function createTestGroup(name, time_limit, memory_limit) {
+    const response = await fetch(profile_tests_url, {
         method: "POST",
         headers: {
             "Content-Type": "application/json",
@@ -30,6 +30,21 @@ export async function createGroupTest(name, time_limit, memory_limit) {
             memory_limit 
         }),
     })
-    const json_data = await response.json()
-    return json_data
+    return await response.json()
+}
+
+
+export async function getTestGroups() {
+    const response = await fetch(profile_tests_url, {
+        method: "GET",
+    })
+    return await response.json()
+}
+
+
+export async function getTestGroup(id) {
+    const response = await fetch(profile_tests_url + `/${id}`, {
+        method: "GET",
+    })
+    return await response.json()
 }

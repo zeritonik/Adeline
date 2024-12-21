@@ -2,30 +2,42 @@ import { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
 
 import { WidgetWithState, NoneState, LoadingState, SuccessState, ErrorState } from "../WidgetWithState"
-import { getTestGroup } from "../api/tests";
-import { useAnouth } from "../api/useAnouth";
 
 export default function TestGroupPage() {
-    useAnouth()
-
     const { id } = useParams();
     const [ testGroup, setTestGroup ] = useState({ name: `Test group ${id}`, tests: [] })
     const [ state, setState ] = useState(NoneState)
 
     useEffect(() => {
-        setState(LoadingState)
         const func = async () => {
             setState(LoadingState)
             try {
-                const json_data = await getTestGroup(id)
-                setTestGroup(json_data)
-                setState(SuccessState)
+                // const response = await getGroupTest(id)
+                // if (response.status === 200) {
+                    
+                // }
+                // setState(SuccessState)
+                setTimeout(
+                    () => {
+                        setTestGroup({
+                            id: id,
+                            name: `Test group ${id}`,
+                            tests: Array(10).fill().map(
+                                (_, i) => { return {
+                                    id: i,
+                                }}
+                            )
+                        })
+                        setState(SuccessState)
+                    },
+                    1000
+                )
             } catch (error) {
                 setState(ErrorState)
             }
         }
         func()
-    }, [ id ])
+    }, [])
 
 
     async function onDeleteTest(id) {
