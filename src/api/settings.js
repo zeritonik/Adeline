@@ -13,3 +13,4 @@ export const settings_url = profile_url + "/settings"
 
 export const tests_url = baseUrl + "/tests"
 export const profile_tests_url = baseUrl + "/profile/tests"
+export const profile_results_url = baseUrl + "/profile/results"

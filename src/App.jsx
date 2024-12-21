@@ -13,6 +13,8 @@ import ProfilePageRouter from './ProfilePage/ProfilePageRouter';
 
 import TestsPageRouter from './TestsPage/TestsPageRouter';
 
+import TestsResultsRouter from './TestsResultsPage/TestsResultsRouter';
+
 import PageNotFound from './PageNotFound';
 
 /* context */
@@ -44,7 +46,7 @@ export default function App() {
                         { TestsPageRouter() }
                     </Route>
                     <Route path="results">
-                        
+                        { TestsResultsRouter() }
                     </Route>
                 </Route>
                 <Route path="*" element={<PageNotFound />} />

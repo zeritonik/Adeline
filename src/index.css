@@ -35,6 +35,15 @@ a:hover {
 }
 
 
+/* backgrounds */
+.bg-ok {
+    background-color: var(--success-color);
+}
+.bg-warning {
+    background-color: var(--warning-color);
+}
+
+
 /* button */
 .btn {
     padding: 0.5rem;
@@ -237,6 +246,15 @@ a:hover {
     gap: 1rem;
     padding-top: 1rem;
     border-top: 1px solid var(--main-font-color);
+}
+
+
+/* carousel */
+.carousel {
+    display: flex;
+    gap: 1rem;
+    list-style-type: none;
+    overflow: scroll;
 }
 
 
