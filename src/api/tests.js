@@ -17,7 +17,7 @@ export async function createTest(input, correctOutput) {
 }
 
 
-export async function createTestGroup(name, time_limit, memory_limit) {
+export async function createTestGroup(name, time_limit, memory_limit, tests) {
     const response = await fetch(profile_tests_url, {
         method: "POST",
         headers: {
@@ -27,7 +27,8 @@ export async function createTestGroup(name, time_limit, memory_limit) {
             type: "GROUP_TEST", 
             name, 
             time_limit, 
-            memory_limit 
+            memory_limit,
+            tests
         }),
     })
     return await response.json()

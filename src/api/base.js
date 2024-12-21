@@ -20,11 +20,15 @@ export async function loginUser(login, password) {
         },
         body: JSON.stringify({ login, password }),
     })
+    if (response.status === 401) {
+        throw "Invalid login or password"
+    }
     const json_data = await response.json()
     return json_data
 }
 
-export async function logoutUser(all) {
+
+export async function logoutUser(all=false) {
     const response = await fetch(logout_url, {
         method: "POST",
         headers: {

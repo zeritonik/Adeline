@@ -1,4 +1,4 @@
-import { Route, Routes } from "react-router-dom";
+import { Route, Routes, Navigate, useHref } from "react-router-dom";
 import { useState, useEffect, createContext } from "react";
 
 import { loginUser } from "./api/base";
@@ -21,6 +21,7 @@ export const UserContext = createContext(null);
 
 export default function App() {
     const [user, setUser] = useState(null);
+    const href = useHref();
 
     useEffect(() => { (async () => {
         try {
@@ -37,7 +38,7 @@ export default function App() {
                 <Route path="/" element={<MainLayout />} >
                     { MainPageRouter() }
                 </Route>
-                <Route path="/profile" element={<ProfileLayout />} >
+                <Route path="/profile" element={!user ? <Navigate to={"/login?next=" + href} /> : <ProfileLayout />} >
                     { ProfilePageRouter() }
                     <Route path="tests">
                         { TestsPageRouter() }

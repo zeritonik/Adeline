@@ -1,15 +1,12 @@
 import { useEffect, useState } from "react"
 import { Link } from "react-router-dom"
 
-import { useAnouth} from "../api/useAnouth";
 import TestGroupCreationForm from "../forms/TestGroupCreationForm";
 import { WidgetWithState, NoneState, LoadingState, SuccessState, ErrorState } from "../WidgetWithState"
 import { getTestGroups } from "../api/tests"
 
 
 export default function TestGroupsPage() {
-    useAnouth()
-
     const [test_groups, setTestGroups] = useState([])
     const [new_displayed, setNewDisplayed] = useState(false)
 

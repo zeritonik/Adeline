@@ -73,7 +73,7 @@ a:hover {
 
 /* section popup */
 .section-popup {
-    position: fixed;
+    position: absolute;
     width: 40vw;
     
     background-color: var(--main-bg-color);

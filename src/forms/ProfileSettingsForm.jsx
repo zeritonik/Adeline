@@ -1,6 +1,5 @@
 import { useState, useEffect } from "react";
 
-import { useAnouth } from "../api/useAnouth";
 import { getProfileSettings, postProfileSettings } from "../api/profile";
 import { NoneState, LoadingState, SuccessState, ErrorState, WidgetWithState } from "../WidgetWithState";
 import { ErrorsGroup, Form, FormGroup} from "./Form"
@@ -34,7 +33,6 @@ function validateAvatar(avatar) {
 
 
 export default function ProfileSettingsForm() {
-    useAnouth()
     const [login, setLogin] = useState('')
 
     const [nickname, setNickName] = useState('');

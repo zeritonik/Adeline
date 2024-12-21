@@ -1,8 +1,8 @@
 import { useState, useContext } from "react";
-import { useNavigate, useSearchParams } from "react-router-dom"
 
 import { ErrorsGroup, Form, FormGroup } from "./Form";
 import { loginUser } from "../api/base";
+import { useNext } from "../api/useNext";
 
 import { UserContext } from "../App";
 
@@ -13,12 +13,10 @@ export default function LoginForm() {
     const [form_errors, setFormErrors] = useState(null);
 
     const [ user, setUser ] = useContext(UserContext)
-
-    const [searchParams] = useSearchParams();
-    const navigate = useNavigate();
+    const [ next, navigate ] = useNext("/profile")
 
     if (user) {
-        navigate(searchParams.get("next") || "/profile")
+        navigate(next)
     }
 
     async function handleSubmit(e) {
