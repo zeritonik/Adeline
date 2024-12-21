@@ -181,23 +181,23 @@ func (dp *DatabaseProvider) InsertTestGroupRezult(tg TestGroupResult) (error, ma
 	return nil, e
 }
 
-func (dp *DatabaseProvider) GetTestGroupResultInfo(id int, login string) (*TestGroup, error) {
-	tg := TestGroupResult{group_id: new(int), source_code: new(string), language: new(string)}
-	var r []string
-	row := dp.db.QueryRow(`select id,name,author,time_limit,memory_limit,tests from test_group where id = $1 and author = $2;`, id, login)
-	if err := row.Scan(tg.Id, tg.Name, tg.Author, tg.Time_limit, tg.Memory_limit, pq.Array(&r)); err != nil {
-		return nil, err
-	}
-	for i, val := range r {
-		rez := strings.Split(val, ",")
-		tg.Tests = append(tg.Tests, Test{Id: new(int), Input: new(string), Correct_output: new(string)})
-		id, _ = (strconv.Atoi(strings.Trim(rez[0], "(")))
-		tg.Tests[i].Id = &id
-		input := strings.Trim(rez[1], "\"")
-		tg.Tests[i].Input = &input
-		output := strings.Trim(strings.Trim(rez[2], ")"), "\"")
-		tg.Tests[i].Correct_output = &output
-	}
+// func (dp *DatabaseProvider) GetTestGroupResultInfo(id int, login string) (*TestGroup, error) {
+// 	tg := TestGroupResult{group_id: new(int), source_code: new(string), language: new(string)}
+// 	var r []string
+// 	row := dp.db.QueryRow(`select id,name,author,time_limit,memory_limit,tests from test_group where id = $1 and author = $2;`, id, login)
+// 	if err := row.Scan(tg.Id, tg.Name, tg.Author, tg.Time_limit, tg.Memory_limit, pq.Array(&r)); err != nil {
+// 		return nil, err
+// 	}
+// 	for i, val := range r {
+// 		rez := strings.Split(val, ",")
+// 		tg.Tests = append(tg.Tests, Test{Id: new(int), Input: new(string), Correct_output: new(string)})
+// 		id, _ = (strconv.Atoi(strings.Trim(rez[0], "(")))
+// 		tg.Tests[i].Id = &id
+// 		input := strings.Trim(rez[1], "\"")
+// 		tg.Tests[i].Input = &input
+// 		output := strings.Trim(strings.Trim(rez[2], ")"), "\"")
+// 		tg.Tests[i].Correct_output = &output
+// 	}
 
-	return &tg, nil
-}
+// 	return &tg, nil
+// }
