@@ -1,12 +1,12 @@
 import { register_url, login_url, logout_url } from "./settings"
 
-export async function registerUser(login, password) {
+export async function registerUser(login, nickname, password) {
     const response = await fetch(register_url, {
         method: "POST",
         headers: {
             "Content-Type": "application/json",
         },
-        body: JSON.stringify({ login, password }),
+        body: JSON.stringify({ login, nickname, password }),
     })
     if (response.status !== 200) {
         throw new Error("Registration error")
