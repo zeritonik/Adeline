@@ -171,7 +171,7 @@ func (srv *Server) GetTestGroupRez(c echo.Context) error {
 	}
 
 	fmt.Println(*inf.Code, *inf.Language, *inf.TestGroupId)
-	test, err := srv.uc.GetTestGroup(*inf.TestGroupId, *user.Login)
+	test, err := srv.uc.GetTestGroup(*inf.TestGroupId, *cc.Login)
 	if err != nil {
 		return c.String(http.StatusInternalServerError, err.Error())
 	}
