@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useParams } from "react-router-dom";
+import { Link, useParams } from "react-router-dom";
 
 import { WidgetWithState, NoneState, LoadingState, SuccessState, ErrorState } from "../WidgetWithState"
 import { getTestGroup } from "../api/tests";
@@ -29,11 +29,12 @@ export default function TestGroupPage() {
         <section className="section" style={{ width: "66%" }}>
             <WidgetWithState state={state}>
                 <h2 className="section__title">{testGroup.name}</h2>
-                <p>Time limit: {testGroup.time_limit}</p>
-                <p>Memory limit: {testGroup.memory_limit}</p>
+                <p>Time limit: {testGroup.time_limit}ms.</p>
+                <p>Memory limit: {testGroup.memory_limit}mb.</p>
                 <div className="card-group" style={{ display: "flex", flexDirection: "column", gap: "1rem"}}>
                     {testGroup.tests.map((test) => <Test key={test.id} id={test.id} input={test.input} output={test.correct_output} />)}
                 </div>
+                <Link className="btn" to="send">Send solution!</Link>
             </WidgetWithState>
         </section>
     )
