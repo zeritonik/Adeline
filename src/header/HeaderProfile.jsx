@@ -5,7 +5,7 @@ import { UserContext } from "../App";
 
 
 function HeaderProfileMenu() {
-    const [user, _] = useContext(UserContext);
+    const [user] = useContext(UserContext);
 
     if (user) {
         return (
