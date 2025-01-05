@@ -217,28 +217,16 @@ func (srv *Server) DeleteGroup(c echo.Context) error {
 }
 
 func (srv *Server) GetResults(c echo.Context) error {
-	cookie, err := c.Cookie("astiay_isos")
+	cc := c.(*CustomCont)
+	fmt.Println(123)
+	if cc.User == nil {
+		return c.JSON(401, Message{"Not autorized"})
+	}
+	tgr, err := srv.uc.GetTestGroupResult(*cc.Login)
 	if err != nil {
-		return c.String(http.StatusInternalServerError, err.Error())
+		return cc.JSON(http.StatusInternalServerError, err.Error())
 	}
-	f, err := srv.uc.CheckSession(cookie.Value)
-	if err != nil {
-		return c.String(http.StatusInternalServerError, err.Error())
-	}
-	if !f {
-		return c.String(401, "")
-	}
-	user, err := srv.uc.GetUser(cookie.Value)
-	if err != nil {
-		return c.String(http.StatusInternalServerError, err.Error())
-	}
-	tgr, err := srv.uc.GetTestGroupResult(*user.Login)
-	if err != nil {
-		return c.JSON(http.StatusInternalServerError, err.Error())
-	}
-	ret := []provider.Rez{*tgr}
-
-	return c.JSON(http.StatusOK, ret)
+	return cc.JSON(http.StatusOK, tgr)
 
 }
 func ExecutePython(id int, code string, input string) (string, error) {

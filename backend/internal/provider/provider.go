@@ -6,16 +6,6 @@ import (
 	"log"
 )
 
-type Rez struct {
-	Id                 *int     `json:"id"`
-	Group_id           *int     `json:"group_id"`
-	Source_code        *string  `json:"code"`
-	Language           *string  `json:"language"`
-	Test_results       []string `json:"results"`
-	Verdict            *string  `json:"verdict"`
-	Max_execution_time *int     `json:"max_exec_time"`
-	Max_memory         *int     `json:"max_memory"`
-}
 type UserInf struct {
 	Login    *string `json:"login"`
 	Nickname *string `json:"nickname"`
@@ -63,6 +53,7 @@ type TestGroupResult struct {
 	Verdict            *string      `json:"verdict"`
 	Max_execution_time *int         `json:"max_exec_time"`
 	Max_memory         *int         `json:"max_memory"`
+	String_results     []string     `json:"results"`
 }
 type DatabaseProvider struct {
 	db *sql.DB

@@ -10,8 +10,8 @@ import (
 )
 
 func (dp *DatabaseProvider) CreateUser(user User) error {
-	_, err := dp.db.Exec(`INSERT INTO user_inf(login,nickname,password,avatar) values($1,$2,$3,$4);`,
-		*(user.Login), *(user.Nickname), *(user.Password), *(user.Avatar))
+	_, err := dp.db.Exec(`INSERT INTO user_inf(login,nickname,password,avatar) values($1,$2,$3,null);`,
+		*(user.Login), *(user.Nickname), *(user.Password))
 	return err
 }
 
@@ -136,16 +136,16 @@ func (dp *DatabaseProvider) GetTestGroupInfo(id int, login string) (*TestGroup, 
 }
 
 func (dp *DatabaseProvider) GetTestGroupInfoLOGIN(login string) ([]TestGroup, error) {
-	var arrtg []TestGroup
+	var arrtg []TestGroup = make([]TestGroup, 0)
 	var r []string
 	row, err := dp.db.Query(`select id,name,author,time_limit,memory_limit,tests from test_group where author = $1;`, login)
 	if err != nil {
-		return nil, err
+		return arrtg, err
 	}
 	for row.Next() {
 		tg := TestGroup{Id: new(int), Name: new(string), Time_limit: new(int), Memory_limit: new(int), Author: new(string), Tests: *new([]Test)}
 		if err := row.Scan(tg.Id, tg.Name, tg.Author, tg.Time_limit, tg.Memory_limit, pq.Array(&r)); err != nil {
-			return nil, err
+			return arrtg, err
 		}
 		for i, val := range r {
 			rez := strings.Split(val, ",")
@@ -188,39 +188,17 @@ func (dp *DatabaseProvider) DeleteTestGroup(id int, login string) error {
 	return nil
 }
 
-func (dp *DatabaseProvider) GetTestGroupResultInfo(login string) (*Rez, error) {
-	tg := TestGroupResult{Group_id: new(int), Source_code: new(string), Language: new(string), Id: new(int), Max_execution_time: new(int), Verdict: new(string), Max_memory: new(int)}
-	var r []string
-	row := dp.db.QueryRow(`select test_group_result.id,language,max_execution_time, max_memory,source_code,test_results from test_group_result inner join test_group on group_id = test_group.id where author = $1 and test_group_result.id = 3;`, login)
-	if err := row.Scan(tg.Id, tg.Language, tg.Max_execution_time, tg.Max_memory, tg.Source_code, pq.Array(&r)); err != nil {
-		fmt.Println(err.Error())
-		return nil, err
+func (dp *DatabaseProvider) GetTestGroupResultInfo(login string) ([]TestGroupResult, error) {
+	tgr := make([]TestGroupResult, 0)
+	rows, err := dp.db.Query(`select test_group_result.id,group_id,language,max_execution_time, max_memory,source_code,results, verdict from test_group_result inner join test_group on group_id = test_group.id where author = $1;`, login)
+	if err != nil {
+		return tgr, err
 	}
-	fmt.Println(r)
-	re := Rez{Group_id: new(int), Source_code: new(string), Language: new(string), Id: new(int), Max_execution_time: new(int), Verdict: new(string), Max_memory: new(int)}
-	re.Test_results = make([]string, 0)
-	*(re.Id) = *(tg.Id)
-	*(re.Group_id) = *(tg.Group_id)
-	*(re.Max_execution_time) = *(tg.Max_execution_time)
-	*(re.Max_memory) = *(tg.Max_memory)
-	*(re.Language) = *(tg.Language)
-	for i, val := range r {
-		rez := strings.Split(val, ",")
-		tg.Test_results = append(tg.Test_results, TestResult{Test_id: new(int), Output: new(string), Verdict: new(string), Execution_time: new(int), Max_memory: new(int)})
-		*(tg.Test_results[i].Test_id), _ = strconv.Atoi(strings.Trim(rez[0], "("))
-		*(tg.Test_results[i].Output) = rez[1]
-		*(tg.Test_results[i].Verdict) = rez[2]
-		*(tg.Test_results[i].Max_memory), _ = strconv.Atoi(rez[3])
-		*(tg.Test_results[i].Execution_time), _ = strconv.Atoi(strings.Trim(rez[4], ")"))
-		re.Test_results = append(re.Test_results, rez[2])
+	for rows.Next() {
+		tg := TestGroupResult{Id: new(int), Group_id: new(int), Source_code: new(string), Language: new(string), Verdict: new(string), Max_execution_time: new(int), Max_memory: new(int), Test_results: make([]TestResult, 0), String_results: make([]string, 0)}
+		rows.Scan(tg.Id, tg.Group_id, tg.Language, tg.Max_execution_time, tg.Max_memory, tg.Source_code, tg.String_results, tg.Verdict)
+		fmt.Println(tg.String_results)
 
-		// id, _ = (strconv.Atoi(strings.Trim(rez[0], "(")))
-		// tg.Test_results[i].Test_id = &id
-		// input := strings.Trim(rez[1], "\"")
-		// tg.Test_results[i].Input = &input
-		// output := strings.Trim(strings.Trim(rez[2], ")"), "\"")
-		// tg.Tests[i].Correct_output = &output
 	}
-
-	return &re, nil
+	return tgr, nil
 }

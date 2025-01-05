@@ -20,5 +20,5 @@ type DatabaseProvider interface {
 	GetTestGroupInfo(id int, login string) (*provider.TestGroup, error)
 	GetTestGroupInfoLOGIN(login string) ([]provider.TestGroup, error)
 	DeleteTestGroup(id int, login string) error
-	GetTestGroupResultInfo(login string) (*provider.Rez, error)
+	GetTestGroupResultInfo(login string) ([]provider.TestGroupResult, error)
 }

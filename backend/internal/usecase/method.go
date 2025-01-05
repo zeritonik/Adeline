@@ -118,9 +118,10 @@ func (u *Usecase) DeleteTestGroup(login string, id int) error {
 	return u.p.DeleteTestGroup(id, login)
 }
 
-func (u *Usecase) GetTestGroupResult(login string) (*provider.Rez, error) {
+func (u *Usecase) GetTestGroupResult(login string) ([]provider.TestGroupResult, error) {
 	return u.p.GetTestGroupResultInfo(login)
 }
-func (u *Usecase) GetCountTg() int {
-	return u.GetCountTg()
-}
+
+// func (u *Usecase) GetCountTg() int {
+// 	return u.GetCountTg()
+// }
