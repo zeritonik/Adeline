@@ -22,7 +22,7 @@ func NewServer(ip string, port int, maxSize int, uc Usecase) *Server {
 	}
 
 	api.server = echo.New()
-
+	api.server.Use(api.AuthorizationCheck)
 	api.server.POST("/api/register", api.PostCreateUser)
 	api.server.POST("/api/login", api.PostLogin)
 	api.server.GET("/api/profile/settings", api.GetSettings)
@@ -36,6 +36,8 @@ func NewServer(ip string, port int, maxSize int, uc Usecase) *Server {
 	api.server.GET("/api/profile/results", api.GetResults)
 	api.server.File("*/", "./build/index.html")
 	api.server.Static("/static/*", "./build/static")
+	api.server.Static("/img/*", "./build/img")
+
 	api.address = fmt.Sprintf("%s:%d", ip, port)
 	return &api
 }

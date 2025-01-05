@@ -29,10 +29,8 @@ type ConnInf struct {
 	Dbname   string
 }
 type User struct {
-	Login    *string `json:"login"`
-	Nickname *string `json:"nickname"`
+	UserInf
 	Password *string `json:"password"`
-	Avatar   *string `json:"avatar"`
 }
 type Test struct {
 	Id             *int    `json:"id"`
@@ -54,8 +52,8 @@ type TestGroup struct {
 	Tests        []Test  `json:"tests"`
 	Time_limit   *int    `json:"time_limit"`
 	Memory_limit *int    `json:"memory_limit"`
+	Kolvo        int     `json:"quantity_tests"`
 }
-
 type TestGroupResult struct {
 	Id                 *int         `json:"id"`
 	Group_id           *int         `json:"group_id"`
@@ -81,4 +79,9 @@ func NewDatabaseProvider(host string, port int, user, password, dbName string) *
 	}
 
 	return &DatabaseProvider{db: conn}
+}
+
+func (tg *TestGroup) CalcCol() int {
+	k := len(tg.Tests)
+	return k
 }

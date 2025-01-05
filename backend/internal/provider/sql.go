@@ -97,11 +97,11 @@ func (dp *DatabaseProvider) ChangeUserLogin(new string, old string) error {
 	return err
 }
 
-func (dp *DatabaseProvider) InsertTestGroup(tg TestGroup) (error, map[Test]error) {
+func (dp *DatabaseProvider) InsertTestGroup(tg TestGroup) (error, map[Test]error, int) {
 	var id int
 	row := dp.db.QueryRow(`insert into test_group (name,author,time_limit,memory_limit) values ($1,$2,$3,$4) returning id;`, tg.Name, tg.Author, tg.Time_limit, tg.Memory_limit)
 	if err := row.Scan(&id); err != nil {
-		return err, nil
+		return err, nil, 0
 	}
 
 	e := make(map[Test]error)
@@ -112,7 +112,7 @@ func (dp *DatabaseProvider) InsertTestGroup(tg TestGroup) (error, map[Test]error
 			e[val] = nil
 		}
 	}
-	return nil, e
+	return nil, e, id
 }
 
 func (dp *DatabaseProvider) GetTestGroupInfo(id int, login string) (*TestGroup, error) {
@@ -132,7 +132,6 @@ func (dp *DatabaseProvider) GetTestGroupInfo(id int, login string) (*TestGroup, 
 		output := strings.Trim(strings.Trim(rez[2], ")"), "\"")
 		tg.Tests[i].Correct_output = &output
 	}
-
 	return &tg, nil
 }
 

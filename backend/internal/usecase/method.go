@@ -61,8 +61,13 @@ func (u *Usecase) CheckSession(cookie string) (bool, error) {
 	return u.p.GetSession(cookie)
 }
 
-func (u *Usecase) GetUser(cookie string) (*provider.UserInf, error) {
-	return u.p.GetUserInf(cookie)
+func (u *Usecase) GetUser(cookie string) (*provider.User, error) {
+	usinf, err := u.p.GetUserInf(cookie)
+	if err != nil {
+		return nil, err
+	}
+	user := &provider.User{UserInf: *usinf, Password: nil}
+	return user, nil
 }
 
 func (u *Usecase) DelSession(login string, cookie string, all bool) error {
@@ -75,31 +80,31 @@ func (u *Usecase) DelSession(login string, cookie string, all bool) error {
 	return nil
 }
 
-func (u *Usecase) AddTestGroup(tg provider.TestGroup) error {
-	err, e := u.p.InsertTestGroup(tg)
+func (u *Usecase) AddTestGroup(tg provider.TestGroup) (error, *int) {
+	err, e, id := u.p.InsertTestGroup(tg)
 	if err != nil {
-		return err
+		return err, nil
 	}
 	for key, val := range e {
 		if val != nil {
-			return errors.New(string(*key.Id) + val.Error())
+			return errors.New(string(*key.Id) + val.Error()), nil
 		}
 	}
-	return nil
+	return nil, &id
 }
 
-func (u *Usecase) AddTestGroupResult(tg provider.TestGroup) error {
-	err, e := u.p.InsertTestGroup(tg)
-	if err != nil {
-		return err
-	}
-	for key, val := range e {
-		if val != nil {
-			return errors.New(string(*key.Id) + val.Error())
-		}
-	}
-	return nil
-}
+// func (u *Usecase) AddTestGroupResult(tg provider.TestGroup) error {
+// 	err, e := u.p.InsertTestGroup(tg)
+// 	if err != nil {
+// 		return err
+// 	}
+// 	for key, val := range e {
+// 		if val != nil {
+// 			return errors.New(string(*key.Id) + val.Error())
+// 		}
+// 	}
+// 	return nil
+// }
 
 func (u *Usecase) GetTestGroup(id int, login string) (*provider.TestGroup, error) {
 	return u.p.GetTestGroupInfo(id, login)
@@ -115,4 +120,7 @@ func (u *Usecase) DeleteTestGroup(login string, id int) error {
 
 func (u *Usecase) GetTestGroupResult(login string) (*provider.Rez, error) {
 	return u.p.GetTestGroupResultInfo(login)
+}
+func (u *Usecase) GetCountTg() int {
+	return u.GetCountTg()
 }

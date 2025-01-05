@@ -8,256 +8,157 @@ import (
 	"os"
 	"os/exec"
 	"strconv"
+	"strings"
 
 	"github.com/labstack/echo/v4"
 )
 
+func (Srv *Server) AuthorizationCheck(next echo.HandlerFunc) echo.HandlerFunc {
+	return func(c echo.Context) error {
+
+		if !strings.Contains(c.Request().URL.String(), "api") {
+			return next(c)
+		}
+		cc := &CustomCont{Context: c, User: nil, UserCookie: nil}
+		cookie, err := c.Cookie("astiay_isos")
+		if err != nil {
+			return next(cc)
+		}
+		cc.UserCookie = &cookie.Value
+		f, err := Srv.uc.CheckSession(cookie.Value)
+		if err != nil {
+			c.Error(echo.ErrInternalServerError)
+			return nil
+		}
+		if !f {
+			return next(cc)
+		}
+		u, _ := Srv.uc.GetUser(cookie.Value)
+		cc.User = u
+		return next(cc)
+	}
+}
 func (srv *Server) PostCreateUser(c echo.Context) error {
-	user := provider.User{Login: new(string), Password: new(string), Avatar: new(string), Nickname: new(string)}
+	user := provider.User{}
 	if err := c.Bind(&user); err != nil {
-		return c.String(http.StatusInternalServerError, err.Error())
+		return c.JSON(500, Message{Err: err.Error()})
 	}
 	fmt.Println(user.Avatar, user.Login, user.Nickname, user.Password)
 	if err := srv.uc.CreateUser(user); err != nil {
-		return c.String(http.StatusInternalServerError, err.Error())
+		return c.JSON(500, Message{Err: err.Error()})
 	}
-	rez := struct {
-		Ans string `json:"ans"`
-	}{Ans: "Registered"}
-	return c.JSON(http.StatusOK, rez)
+	return c.JSON(http.StatusOK, Message{Err: "Registered"})
 }
 
 func (srv *Server) PostLogin(c echo.Context) error {
-	user := provider.User{Login: new(string), Password: new(string)}
-	cook, err := c.Cookie("astiay_isos")
-	rez := struct {
-		Ans string `json:"ans"`
-	}{}
-	if err == nil {
-		check, err := srv.uc.CheckSession(cook.Value)
-		if err != nil {
-			rez.Ans = err.Error()
-			return c.JSON(http.StatusInternalServerError, rez)
-		}
-		if check {
-			return c.JSON(http.StatusOK, user)
-		}
+	cc := c.(*CustomCont)
+	if cc.User != nil {
+		return cc.JSON(200, cc.UserInf)
 	}
-
-	if err := c.Bind(&user); err != nil {
-		return c.String(http.StatusInternalServerError, err.Error())
+	u := provider.User{}
+	if err := cc.Bind(&u); err != nil {
+		return cc.JSON(400, Message{err.Error()})
 	}
-	if err != nil && user.Login == nil && user.Password == nil {
-		return c.JSON(401, "No_user")
+	if u.Password == nil {
+		return cc.JSON(401, Message{"No Data"})
 	}
-	cooc, err := srv.uc.LoginUser(*user.Login, *user.Password)
+	cookieval, err := srv.uc.LoginUser(*u.Login, *u.Password)
 	if err != nil {
-		return c.String(http.StatusInternalServerError, err.Error())
+		return cc.JSON(401, Message{err.Error()})
 	}
-	cookie := http.Cookie{
-		MaxAge:   3600,
-		Value:    cooc,
-		Name:     "astiay_isos",
-		HttpOnly: false,
-	}
-	c.SetCookie(&cookie)
-	return c.JSON(http.StatusOK, user)
+	c.SetCookie(&http.Cookie{Value: cookieval, Name: "astiay_isos", MaxAge: 3600})
+	return c.JSON(200, u.UserInf)
 }
 
 func (srv *Server) GetSettings(c echo.Context) error {
-	cookie, err := c.Cookie("astiay_isos")
-	if err != nil {
-		return c.String(http.StatusInternalServerError, err.Error())
+	cc := c.(*CustomCont)
+	if cc.User == nil {
+		return c.JSON(401, Message{""})
 	}
-	f, err := srv.uc.CheckSession(cookie.Value)
-	if err != nil {
-		return c.String(http.StatusInternalServerError, err.Error())
-	}
-	if !f {
-		return c.String(401, "")
-	}
-	user, err := srv.uc.GetUser(cookie.Value)
-	if err != nil {
-		return c.String(http.StatusInternalServerError, err.Error())
-	}
-	return c.JSON(http.StatusOK, user)
+	return c.JSON(http.StatusOK, cc.User)
 }
+
 func (srv *Server) PostLogout(c echo.Context) error {
 	s := struct {
 		All *bool `json:"all"`
 	}{}
-	rez := struct {
-		Ans string `json:"ans"`
-	}{}
-	cookie, err := c.Cookie("astiay_isos")
-	if err != nil {
-		rez.Ans = err.Error()
-		return c.JSON(http.StatusInternalServerError, rez)
-	}
-	user, err := srv.uc.GetUser(cookie.Value)
-	if err != nil {
-		rez.Ans = err.Error()
-		return c.JSON(http.StatusInternalServerError, rez)
+	cc := c.(*CustomCont)
+	if cc.User == nil {
+		return c.JSON(401, Message{""})
 	}
 	if err := c.Bind(&s); err != nil {
-		return c.String(http.StatusInternalServerError, err.Error())
+		return c.JSON(500, Message{Err: err.Error()})
 	}
-	if err := srv.uc.DelSession(*user.Login, cookie.Value, *s.All); err != nil {
-		return c.String(http.StatusInternalServerError, err.Error())
+	if err := srv.uc.DelSession(*cc.Login, *cc.UserCookie, *s.All); err != nil {
+		return c.JSON(500, Message{Err: err.Error()})
 	}
-	rez.Ans = "DELETED"
-	return c.JSON(http.StatusOK, rez)
+	return c.JSON(http.StatusOK, Message{"deleted"})
 }
 
 func (srv *Server) PostSettings(c echo.Context) error {
-	cookie, err := c.Cookie("astiay_isos")
-	if err != nil {
-		return c.String(http.StatusInternalServerError, err.Error())
+	cc := c.(*CustomCont)
+	if cc.User == nil {
+		return c.JSON(401, Message{""})
 	}
-	f, err := srv.uc.CheckSession(cookie.Value)
-	if err != nil {
-		return c.String(http.StatusInternalServerError, err.Error())
+	u := provider.User{}
+	if err := c.Bind(&u); err != nil {
+		return cc.JSON(400, Message{err.Error()})
 	}
-	if !f {
-		return c.String(401, "")
+	if err := srv.uc.ChangeSettings(u.Login, u.Password, u.Nickname, u.Avatar, *cc.UserCookie); err != nil {
+		return c.JSON(500, Message{err.Error()})
 	}
-	user := provider.User{}
-	if err := c.Bind(&user); err != nil {
-		return c.String(http.StatusInternalServerError, err.Error())
-	}
-	if err := srv.uc.ChangeSettings(user.Login, user.Password, user.Nickname, user.Avatar, cookie.Value); err != nil {
-		return c.String(http.StatusInternalServerError, err.Error())
-	}
-	return c.String(http.StatusOK, "")
+	return c.JSON(http.StatusOK, u.UserInf)
 }
 
 func (srv *Server) PostTests(c echo.Context) error {
-	cookie, err := c.Cookie("astiay_isos")
-	if err != nil {
-		return c.String(http.StatusInternalServerError, err.Error())
+	cc := c.(*CustomCont)
+	if cc.User == nil {
+		return c.JSON(401, Message{""})
 	}
-	f, err := srv.uc.CheckSession(cookie.Value)
-	if err != nil {
-		return c.String(http.StatusInternalServerError, err.Error())
-	}
-	if !f {
-		return c.String(401, "")
-	}
-	user, err := srv.uc.GetUser(cookie.Value)
-	if err != nil {
-		return c.String(http.StatusInternalServerError, err.Error())
-	}
-	tg := provider.TestGroup{Author: new(string)}
+	tg := provider.TestGroup{}
 	if err := c.Bind(&tg); err != nil {
 		return c.String(http.StatusInternalServerError, err.Error())
 	}
-	*(tg.Author) = *(user.Login)
-	if err := srv.uc.AddTestGroup(tg); err != nil {
-		return c.String(http.StatusInternalServerError, err.Error())
-	}
-	rez := struct {
-		Id           *int    `json:"id"`
-		Name         *string `json:"name"`
-		Author       *string `json:"author"`
-		Kolvo        *int    `json:"quantityOfTests"`
-		Time_limit   *int    `json:"time_limit"`
-		Memory_limit *int    `json:"memory_limit"`
-	}{Id: new(int), Name: new(string), Author: new(string), Kolvo: new(int), Time_limit: new(int), Memory_limit: new(int)}
-	*(rez.Author) = *(tg.Author)
-	*(rez.Memory_limit) = *(tg.Memory_limit)
-	*(rez.Kolvo) = (len(tg.Tests))
-	*(rez.Time_limit) = *(tg.Time_limit)
-	*(rez.Name) = *(tg.Name)
-
-	return c.JSON(http.StatusCreated, rez)
+	tg.Author = cc.Login
+	tg.Kolvo = tg.CalcCol()
+	_, tg.Id = srv.uc.AddTestGroup(tg)
+	return c.JSON(http.StatusCreated, &tg)
 }
 
 func (srv *Server) GetTests(c echo.Context) error {
-	cookie, err := c.Cookie("astiay_isos")
-	if err != nil {
-		return c.String(http.StatusInternalServerError, err.Error())
+	cc := c.(*CustomCont)
+	if cc.User == nil {
+		return c.JSON(401, Message{""})
 	}
-	f, err := srv.uc.CheckSession(cookie.Value)
-	if err != nil {
-		return c.String(http.StatusInternalServerError, err.Error())
-	}
-	if !f {
-		return c.String(401, "")
-	}
-	id := c.Param("id")
-	user, err := srv.uc.GetUser(cookie.Value)
-	if err != nil {
-		return c.String(http.StatusInternalServerError, err.Error())
-	}
-
+	id := cc.Param("id")
 	if id != "" {
 		var tg *provider.TestGroup
 		Id, _ := strconv.Atoi(id)
-		tg, err = srv.uc.GetTestGroup(Id, *user.Login)
+		tg, err := srv.uc.GetTestGroup(Id, *cc.Login)
 		if err != nil {
-			return c.String(http.StatusInternalServerError, err.Error())
+			return c.JSON(http.StatusInternalServerError, Message{err.Error()})
 		}
 		if tg == nil {
-			return c.String(http.StatusBadRequest, "No data to this user")
+			return c.JSON(500, Message{"No data to this user"})
 		}
-
+		tg.Kolvo = tg.CalcCol()
 		return c.JSON(http.StatusOK, tg)
 	}
-	tgs, err := srv.uc.GetTestGroupwithLogin(*user.Login)
-	if err != nil {
-		return c.String(http.StatusInternalServerError, err.Error())
-	}
-	var a []struct {
-		Id           *int    `json:"id"`
-		Memory_limit *int    `json:"memory_limit"`
-		Time_limit   *int    `json:"time_limit"`
-		Kolvo        *int    `json:"quantity_tests"`
-		Author       *string `json:"author"`
-		Name         *string `json:"name"`
-	} = make([]struct {
-		Id           *int    `json:"id"`
-		Memory_limit *int    `json:"memory_limit"`
-		Time_limit   *int    `json:"time_limit"`
-		Kolvo        *int    `json:"quantity_tests"`
-		Author       *string `json:"author"`
-		Name         *string `json:"name"`
-	}, 0)
-	for _, val := range tgs {
-		u := struct {
-			Id           *int    `json:"id"`
-			Memory_limit *int    `json:"memory_limit"`
-			Time_limit   *int    `json:"time_limit"`
-			Kolvo        *int    `json:"quantity_tests"`
-			Author       *string `json:"author"`
-			Name         *string `json:"name"`
-		}{Memory_limit: new(int), Time_limit: new(int), Kolvo: new(int), Author: new(string), Name: new(string), Id: new(int)}
-		*(u.Memory_limit) = *(val.Memory_limit)
-		*(u.Time_limit) = *(val.Time_limit)
-		*(u.Author) = *(val.Author)
-		*(u.Kolvo) = len(val.Tests)
-		*(u.Name) = *(val.Name)
-		*(u.Id) = *(val.Id)
-		a = append(a, u)
-	}
-	return c.JSON(http.StatusOK, a)
+	tgs, err := srv.uc.GetTestGroupwithLogin(*cc.Login)
 
+	if err != nil {
+		return c.JSON(500, Message{err.Error()})
+	}
+	for i := range tgs {
+		tgs[i].Kolvo = tgs[i].CalcCol()
+	}
+	return c.JSON(http.StatusOK, tgs)
 }
 
 func (srv *Server) GetTestGroupRez(c echo.Context) error {
-	cookie, err := c.Cookie("astiay_isos")
-	if err != nil {
-		return c.String(http.StatusInternalServerError, err.Error())
-	}
-	f, err := srv.uc.CheckSession(cookie.Value)
-	if err != nil {
-		return c.String(http.StatusInternalServerError, err.Error())
-	}
-	if !f {
-		return c.String(401, "")
-	}
-	user, err := srv.uc.GetUser(cookie.Value)
-	if err != nil {
-		return c.String(http.StatusInternalServerError, err.Error())
+	cc := c.(*CustomCont)
+	if cc.User == nil {
+		return c.JSON(401, Message{"Unautorized"})
 	}
 
 	inf := struct {
@@ -265,8 +166,8 @@ func (srv *Server) GetTestGroupRez(c echo.Context) error {
 		Language    *string `json:"language"`
 		TestGroupId *int    `json:"test_group_id"`
 	}{}
-	if err := c.Bind(&inf); err != nil {
-		return c.String(http.StatusInternalServerError, err.Error())
+	if err := cc.Bind(&inf); err != nil {
+		return cc.String(http.StatusInternalServerError, err.Error())
 	}
 
 	fmt.Println(*inf.Code, *inf.Language, *inf.TestGroupId)
@@ -335,8 +236,9 @@ func (srv *Server) GetResults(c echo.Context) error {
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, err.Error())
 	}
+	ret := []provider.Rez{*tgr}
 
-	return c.JSON(http.StatusOK, tgr)
+	return c.JSON(http.StatusOK, ret)
 
 }
 func ExecutePython(id int, code string, input string) (string, error) {
