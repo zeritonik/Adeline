@@ -20,17 +20,6 @@ export default function TestResultsPage() {
             }
         }
         func()
-
-        // setState(LoadingState)
-        // setTimeout(() => { setTestResults([
-        //         { id: 1, max_time: 100, max_memory: 100, tests_results: ['OK', 'OK', 'OK', 'WA', 'TL', 'OK', 'CE'] },
-        //         { id: 2, max_time: 100, max_memory: 100, tests_results: ['OK', 'OK', 'OK', 'WA', 'TL', 'OK', 'CE'] },
-        //         { id: 3, max_time: 100, max_memory: 100, tests_results: ['OK', 'OK', 'OK', 'WA', 'TL', 'OK', 'CE'] },
-        //         { id: 4, max_time: 100, max_memory: 100, tests_results: ['OK', 'OK', 'OK', 'WA', 'TL', 'OK', 'CE'] },
-        //         { id: 5, max_time: 100, max_memory: 100, tests_results: ['OK', 'OK', 'OK', 'WA', 'TL', 'OK', 'CE'] },
-        //     ])
-        //     setState(SuccessState)
-        // }, 1000)
     }, [])
     
     return (
