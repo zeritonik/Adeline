@@ -71,6 +71,7 @@ export default function TestGroupCreationForm( {onSuccess=() => {}, onError=() =
     const [ test_id, setTestId ] = useState(0);
     const [ tests, setTests ] = useState([]);
     const [ tests_errors, setTestsErrors ] = useState(null);
+    useEffect(() => {setTestsErrors(validateTests(tests))}, [tests])
 
     const [form_errors, setFormErrors] = useState([]);
     useEffect(() => {setFormErrors([])}, [name, time_limit, memory_limit])

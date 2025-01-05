@@ -43,7 +43,7 @@ export default function TestGroupsPage() {
             <WidgetWithState state={state}>
                 <h2 className="section__title">Your test-groups:</h2>
                 <div className="card-group" style={{gridTemplateColumns: "repeat(5, 1fr)", gap: "1.5rem"}}>
-                    <a onClick={ () => { setNewDisplayed(true); setState(NoneState) } } className="card clickable" style={{justifyContent: "center"}}>
+                    <a href="" onClick={ () => { setNewDisplayed(true); setState(NoneState) } } className="card clickable" style={{justifyContent: "center"}}>
                         <h3 className="card__title">Create new test group</h3>
                     </a>
                     {test_groups.map((test_group) => {

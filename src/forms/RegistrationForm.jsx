@@ -81,7 +81,7 @@ export default function RegistrationForm() {
             return
         }
         try {
-            await registerUser(login, password)
+            await registerUser(login, nickname, password)
             navigate(next)
         } catch (error) {
             setFormErrors(["Registration error " + error])

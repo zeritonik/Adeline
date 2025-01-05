@@ -1,15 +1,15 @@
 import { register_url, login_url, logout_url } from "./settings"
 
-export async function registerUser(login, password) {
+export async function registerUser(login, nickname, password) {
     const response = await fetch(register_url, {
         method: "POST",
         headers: {
             "Content-Type": "application/json",
         },
-        body: JSON.stringify({ login, password }),
+        body: JSON.stringify({ login, nickname, password }),
     })
     if (response.status !== 200) {
-        throw "Registration error"
+        throw new Error("Registration error")
     }
     const json_data = await response.json()
     return json_data
@@ -24,7 +24,7 @@ export async function loginUser(login, password) {
         body: JSON.stringify({ login, password }),
     })
     if (response.status === 401) {
-        throw "Invalid login or password"
+        throw new Error("Invalid login or password")
     }
     const json_data = await response.json()
     return json_data
@@ -40,7 +40,7 @@ export async function logoutUser(all=false) {
         body: JSON.stringify({ all }),
     })
     if (response.status !== 200) {
-        throw "Logout error"
+        throw new Error("Logout error")
     }
     const json_data = await response.json()
     return json_data

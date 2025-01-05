@@ -48,3 +48,18 @@ export async function getTestResult(id) {
     })
     return await response.json()
 }
+
+
+export async function sendSolution(language, source) {
+    const response = await fetch(profile_tests_url, {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+            language, 
+            source
+        }),
+    })
+    return await response.json()
+}
