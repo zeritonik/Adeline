@@ -14,7 +14,7 @@ export function SendForm({ test_group_id }) {
         e.preventDefault();
         console.log("hui")
         try {
-            await sendSolution(language, source)
+            await sendSolution(test_group_id,language, source)
         } catch (error) {
             setFormErrors(["Send error: " + error])
         }

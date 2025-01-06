@@ -1,4 +1,4 @@
-import { profile_tests_url, profile_results_url } from "./settings"
+import { profile_tests_url, profile_results_url, send_solution_url } from "./settings"
 
 
 export async function createTestGroup(name, time_limit, memory_limit, tests) {
@@ -50,8 +50,8 @@ export async function getTestResult(id) {
 }
 
 
-export async function sendSolution(language, source) {
-    const response = await fetch(profile_tests_url, {
+export async function sendSolution(test_group_id, language, source) {
+    const response = await fetch(profile_tests_url + `/${test_group_id}/send`, {
         method: "POST",
         headers: {
             "Content-Type": "application/json",
