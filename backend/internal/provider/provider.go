@@ -7,9 +7,9 @@ import (
 )
 
 type UserInf struct {
-	Login    *string `json:"login"`
-	Nickname *string `json:"nickname"`
-	Avatar   *string `json:"avatar"`
+	Login    *string `json:"login" form:"login"`
+	Nickname *string `json:"nickname" form:"nickname"`
+	Avatar   *string `json:"avatar" form:"avatar"`
 }
 type ConnInf struct {
 	Host     string

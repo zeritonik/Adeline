@@ -37,6 +37,7 @@ func NewServer(ip string, port int, maxSize int, uc Usecase) *Server {
 	api.server.File("*/", "./build/index.html")
 	api.server.Static("/static/*", "./build/static")
 	api.server.Static("/img/*", "./build/img")
+	api.server.Static("/media/avatars/*", "./media/avatars/")
 
 	api.address = fmt.Sprintf("%s:%d", ip, port)
 	return &api

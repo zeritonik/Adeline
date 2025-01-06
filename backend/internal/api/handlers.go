@@ -4,6 +4,8 @@ import (
 	"adeline/backend/internal/provider"
 	"bytes"
 	"fmt"
+	"io"
+	"mime/multipart"
 	"net/http"
 	"os"
 	"os/exec"
@@ -109,6 +111,15 @@ func (srv *Server) PostSettings(c echo.Context) error {
 	if err := c.Bind(&u); err != nil {
 		return cc.JSON(400, Message{err.Error()})
 	}
+	file, err := cc.FormFile("avatar")
+	if err != nil {
+		return cc.JSON(500, Message{err.Error()})
+	}
+	if err := SaveImg(file); err != nil {
+		return cc.JSON(500, Message{err.Error()})
+	}
+	path := "/media/avatars/" + file.Filename
+	u.Avatar = &path
 	fmt.Println(*u.Avatar)
 	if err := srv.uc.ChangeSettings(u.Login, u.Password, u.Nickname, u.Avatar, *cc.UserCookie); err != nil {
 		return c.JSON(500, Message{err.Error()})
@@ -260,5 +271,23 @@ func ExecutePython(tg *provider.TestGroup, tr *provider.TestGroupResult) error {
 
 	}
 
+	return nil
+}
+
+func SaveImg(file *multipart.FileHeader) error {
+	src, err := file.Open()
+	if err != nil {
+		return err
+	}
+	defer src.Close()
+	path := "media/avatars/" + file.Filename
+	dst, err := os.Create(path)
+	if err != nil {
+		return err
+	}
+	defer dst.Close()
+	if _, err = io.Copy(dst, src); err != nil {
+		return err
+	}
 	return nil
 }
