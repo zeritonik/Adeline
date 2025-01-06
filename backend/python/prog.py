@@ -1,1 +1,3 @@
-print(123)
+a = int(input)
+for i in range(a):
+    print(123)

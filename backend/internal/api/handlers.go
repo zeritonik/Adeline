@@ -9,6 +9,7 @@ import (
 	"os/exec"
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/labstack/echo/v4"
 )
@@ -19,8 +20,10 @@ func (Srv *Server) AuthorizationCheck(next echo.HandlerFunc) echo.HandlerFunc {
 		if !strings.Contains(c.Request().URL.String(), "api") {
 			return next(c)
 		}
+
 		cc := &CustomCont{Context: c, User: nil, UserCookie: nil}
 		cookie, err := c.Cookie("astiay_isos")
+
 		if err != nil {
 			return next(cc)
 		}
@@ -35,6 +38,8 @@ func (Srv *Server) AuthorizationCheck(next echo.HandlerFunc) echo.HandlerFunc {
 		}
 		u, _ := Srv.uc.GetUser(cookie.Value)
 		cc.User = u
+		// fmt.Println(err.Error())
+
 		return next(cc)
 	}
 }
@@ -117,7 +122,10 @@ func (srv *Server) PostTests(c echo.Context) error {
 	}
 	tg := provider.TestGroup{}
 	if err := c.Bind(&tg); err != nil {
-		return c.String(http.StatusInternalServerError, err.Error())
+		return c.JSON(500, Message{err.Error()})
+	}
+	if tg.Name == nil {
+		return c.JSON(400, Message{"No data"})
 	}
 	tg.Author = cc.Login
 	tg.Kolvo = tg.CalcCol()
@@ -134,7 +142,7 @@ func (srv *Server) GetTests(c echo.Context) error {
 	if id != "" {
 		var tg *provider.TestGroup
 		Id, _ := strconv.Atoi(id)
-		tg, err := srv.uc.GetTestGroup(Id, *cc.Login)
+		tg, err := srv.uc.GetTestGroup(Id)
 		if err != nil {
 			return c.JSON(http.StatusInternalServerError, Message{err.Error()})
 		}
@@ -155,62 +163,46 @@ func (srv *Server) GetTests(c echo.Context) error {
 	return c.JSON(http.StatusOK, tgs)
 }
 
-func (srv *Server) GetTestGroupRez(c echo.Context) error {
+func (srv *Server) SendCode(c echo.Context) error {
 	cc := c.(*CustomCont)
 	if cc.User == nil {
 		return c.JSON(401, Message{"Unautorized"})
 	}
-
-	inf := struct {
-		Code        *string `json:"source_code"`
-		Language    *string `json:"language"`
-		TestGroupId *int    `json:"test_group_id"`
-	}{}
+	inf := CodeInf{}
 	if err := cc.Bind(&inf); err != nil {
-		return cc.String(http.StatusInternalServerError, err.Error())
+		return cc.JSON(500, Message{err.Error()})
 	}
-
-	fmt.Println(*inf.Code, *inf.Language, *inf.TestGroupId)
-	test, err := srv.uc.GetTestGroup(*inf.TestGroupId, *cc.Login)
+	id, err := strconv.Atoi(cc.Param("id"))
 	if err != nil {
-		return c.String(http.StatusInternalServerError, err.Error())
+		return cc.JSON(500, Message{err.Error()})
 	}
-	// var wg sync.WaitGroup
-	// wg.Add(len(test.Tests))
-	for _, val := range test.Tests {
-		// go func() error {
-		// defer wg.Done()
-		output, _ := ExecutePython(*val.Id, *inf.Code, *val.Input)
-		fmt.Println(output)
-		// }()
+	tg, err := srv.uc.GetTestGroup(id)
+	if err != nil {
+		return cc.JSON(500, Message{err.Error()})
+	}
+	// fmt.Println(*tg.Author)
+	// fmt.Println(*inf.Language)
+	// fmt.Println(*inf.Source)
+	tr := provider.TestGroupResult{}
+	tr.Group_id = tg.Id
+	tr.Language = inf.Language
+	tr.Source_code = inf.Language
+	// tr.Test_results
 
-	}
-	// wg.Wait()
-	return c.JSON(http.StatusOK, test)
+	return c.JSON(200, Message{"ok"})
 }
 
 func (srv *Server) DeleteGroup(c echo.Context) error {
-	cookie, err := c.Cookie("astiay_isos")
-	if err != nil {
-		return c.String(http.StatusInternalServerError, err.Error())
+	cc := c.(*CustomCont)
+	if cc.User == nil {
+		return cc.JSON(401, Message{"Not autorized"})
 	}
-	f, err := srv.uc.CheckSession(cookie.Value)
-	if err != nil {
-		return c.String(http.StatusInternalServerError, err.Error())
-	}
-	if !f {
-		return c.String(401, "")
-	}
-	user, err := srv.uc.GetUser(cookie.Value)
-	if err != nil {
-		return c.String(http.StatusInternalServerError, err.Error())
-	}
-	id := c.Param("id")
+	id := cc.Param("id")
 	if id == "" {
 		return c.JSON(http.StatusBadRequest, "No_id")
 	}
 	i, _ := strconv.Atoi(id)
-	if err := srv.uc.DeleteTestGroup(*user.Login, i); err != nil {
+	if err := srv.uc.DeleteTestGroup(*cc.Login, i); err != nil {
 		return c.JSON(http.StatusInternalServerError, err.Error())
 	}
 	return c.JSON(http.StatusOK, "Deleted")
@@ -218,7 +210,6 @@ func (srv *Server) DeleteGroup(c echo.Context) error {
 
 func (srv *Server) GetResults(c echo.Context) error {
 	cc := c.(*CustomCont)
-	fmt.Println(123)
 	if cc.User == nil {
 		return c.JSON(401, Message{"Not autorized"})
 	}
@@ -226,22 +217,32 @@ func (srv *Server) GetResults(c echo.Context) error {
 	if err != nil {
 		return cc.JSON(http.StatusInternalServerError, err.Error())
 	}
-	return cc.JSON(http.StatusOK, tgr)
+	return cc.JSON(200, tgr)
 
 }
-func ExecutePython(id int, code string, input string) (string, error) {
-	cmd := exec.Command("python3", "backend/tests/prog"+strconv.Itoa(id)+".py")
-	var out bytes.Buffer
-	cmd.Stdin = bytes.NewBufferString(input)
-	cmd.Stdout = &out
-
-	f, _ := os.Create("backend/tests/prog" + strconv.Itoa(id) + ".py")
-	f.WriteString(code)
+func ExecutePython(tg provider.TestGroup, tr *provider.TestGroupResult) error {
+	f, _ := os.Create("backend/tests/prog.py")
+	f.WriteString(*tr.Source_code)
 	f.Close()
-	if err := cmd.Run(); err != nil {
-		return "", err
+	cmd := exec.Command("python3", "backend/tests/prog.py")
+	var out bytes.Buffer
+	cmd.Stdout = &out
+	for i, val := range tg.Tests {
+		rez := provider.TestResult{}
+		start := time.Now()
+		cmd.Stdin = bytes.NewBufferString(*val.Input)
+		if err := cmd.Run(); err != nil {
+			return err
+		}
+		duration := time.Since(start).Abs().Milliseconds()
+		id := i + 1
+		o := out.String()
+		rez.Output = &o
+		rez.Test_id = &id
+		rez.Execution_time = &duration
+		fmt.Println(rez.Execution_time)
+
 	}
 
-	output := out.String()
-	return output, nil
+	return nil
 }

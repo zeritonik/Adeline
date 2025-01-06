@@ -106,8 +106,8 @@ func (u *Usecase) AddTestGroup(tg provider.TestGroup) (error, *int) {
 // 	return nil
 // }
 
-func (u *Usecase) GetTestGroup(id int, login string) (*provider.TestGroup, error) {
-	return u.p.GetTestGroupInfo(id, login)
+func (u *Usecase) GetTestGroup(id int) (*provider.TestGroup, error) {
+	return u.p.GetTestGroupInfo(id)
 }
 
 func (u *Usecase) GetTestGroupwithLogin(login string) ([]provider.TestGroup, error) {

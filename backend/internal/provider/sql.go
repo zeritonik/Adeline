@@ -1,7 +1,6 @@
 package provider
 
 import (
-	"fmt"
 	"log"
 	"strconv"
 	"strings"
@@ -10,7 +9,7 @@ import (
 )
 
 func (dp *DatabaseProvider) CreateUser(user User) error {
-	_, err := dp.db.Exec(`INSERT INTO user_inf(login,nickname,password,avatar) values($1,$2,$3,null);`,
+	_, err := dp.db.Exec(`INSERT INTO user_inf(login,nickname,password,avatar) values($1,$2,$3,'');`,
 		*(user.Login), *(user.Nickname), *(user.Password))
 	return err
 }
@@ -115,10 +114,10 @@ func (dp *DatabaseProvider) InsertTestGroup(tg TestGroup) (error, map[Test]error
 	return nil, e, id
 }
 
-func (dp *DatabaseProvider) GetTestGroupInfo(id int, login string) (*TestGroup, error) {
-	tg := TestGroup{Id: new(int), Name: new(string), Time_limit: new(int), Memory_limit: new(int), Author: new(string), Tests: *new([]Test)}
+func (dp *DatabaseProvider) GetTestGroupInfo(id int) (*TestGroup, error) {
+	tg := TestGroup{Id: new(int), Name: new(string), Time_limit: new(int), Memory_limit: new(int), Author: new(string), Tests: make([]Test, 0)}
 	var r []string
-	row := dp.db.QueryRow(`select id,name,author,time_limit,memory_limit,tests from test_group where id = $1 and author = $2;`, id, login)
+	row := dp.db.QueryRow(`select id,name,author,time_limit,memory_limit,tests from test_group where id = $1;`, id)
 	if err := row.Scan(tg.Id, tg.Name, tg.Author, tg.Time_limit, tg.Memory_limit, pq.Array(&r)); err != nil {
 		return nil, err
 	}
@@ -195,10 +194,32 @@ func (dp *DatabaseProvider) GetTestGroupResultInfo(login string) ([]TestGroupRes
 		return tgr, err
 	}
 	for rows.Next() {
+		var str string
 		tg := TestGroupResult{Id: new(int), Group_id: new(int), Source_code: new(string), Language: new(string), Verdict: new(string), Max_execution_time: new(int), Max_memory: new(int), Test_results: make([]TestResult, 0), String_results: make([]string, 0)}
-		rows.Scan(tg.Id, tg.Group_id, tg.Language, tg.Max_execution_time, tg.Max_memory, tg.Source_code, tg.String_results, tg.Verdict)
-		fmt.Println(tg.String_results)
+		rows.Scan(tg.Id, tg.Group_id, tg.Language, tg.Max_execution_time, tg.Max_memory, tg.Source_code, &str, tg.Verdict)
+		tg.Test_results = ConvertToStrArr(str)
+		tgr = append(tgr, tg)
 
 	}
 	return tgr, nil
+}
+
+func ConvertToStrArr(str string) []TestResult {
+	arr := strings.Split(str, "\",\"")
+	tr := make([]TestResult, 0)
+	for i := range arr {
+		t := TestResult{}
+		arr[i] = strings.Trim(arr[i], "{\"(")
+		arr[i] = strings.Trim(arr[i], ")\"}")
+		temp := strings.Split(arr[i], ",")
+		tmp, _ := strconv.Atoi(temp[0])
+		t.Test_id = &tmp
+		t.Output = &temp[1]
+		t.Verdict = &temp[2]
+		te, _ := strconv.ParseInt(temp[3], 10, 64)
+		t.Execution_time = &te
+		tmp, _ = strconv.Atoi(temp[4])
+		tr = append(tr, t)
+	}
+	return tr
 }

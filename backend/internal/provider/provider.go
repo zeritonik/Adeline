@@ -29,10 +29,10 @@ type Test struct {
 }
 
 type TestResult struct {
-	Test_id        *int    `json:"test_id"`
+	Test_id        *int    `json:"id"`
 	Output         *string `json:"output"`
 	Verdict        *string `json:"verdict"`
-	Execution_time *int    `json:"execution_time"`
+	Execution_time *int64  `json:"execution_time"`
 	Max_memory     *int    `json:"max_memory"`
 }
 type TestGroup struct {
@@ -49,9 +49,9 @@ type TestGroupResult struct {
 	Group_id           *int         `json:"group_id"`
 	Source_code        *string      `json:"code"`
 	Language           *string      `json:"language"`
-	Test_results       []TestResult `json:"test_results"`
+	Test_results       []TestResult `json:"verdicts"`
 	Verdict            *string      `json:"verdict"`
-	Max_execution_time *int         `json:"max_exec_time"`
+	Max_execution_time *int         `json:"max_execution_time"`
 	Max_memory         *int         `json:"max_memory"`
 	String_results     []string     `json:"results"`
 }

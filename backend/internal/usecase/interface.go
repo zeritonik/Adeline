@@ -17,7 +17,7 @@ type DatabaseProvider interface {
 	ChangeUserLogin(string, string) error
 	IsInBase(string, string) (bool, error)
 	InsertTestGroup(tg provider.TestGroup) (error, map[provider.Test]error, int)
-	GetTestGroupInfo(id int, login string) (*provider.TestGroup, error)
+	GetTestGroupInfo(id int) (*provider.TestGroup, error)
 	GetTestGroupInfoLOGIN(login string) ([]provider.TestGroup, error)
 	DeleteTestGroup(id int, login string) error
 	GetTestGroupResultInfo(login string) ([]provider.TestGroupResult, error)
