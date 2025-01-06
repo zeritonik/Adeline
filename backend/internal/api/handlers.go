@@ -109,6 +109,7 @@ func (srv *Server) PostSettings(c echo.Context) error {
 	if err := c.Bind(&u); err != nil {
 		return cc.JSON(400, Message{err.Error()})
 	}
+	fmt.Println(*u.Avatar)
 	if err := srv.uc.ChangeSettings(u.Login, u.Password, u.Nickname, u.Avatar, *cc.UserCookie); err != nil {
 		return c.JSON(500, Message{err.Error()})
 	}
@@ -178,7 +179,7 @@ func (srv *Server) SendCode(c echo.Context) error {
 	}
 	tg, err := srv.uc.GetTestGroup(id)
 	if err != nil {
-		return cc.JSON(500, Message{err.Error()})
+		return cc.JSON(400, Message{err.Error()})
 	}
 	// fmt.Println(*tg.Author)
 	// fmt.Println(*inf.Language)
@@ -186,8 +187,11 @@ func (srv *Server) SendCode(c echo.Context) error {
 	tr := provider.TestGroupResult{}
 	tr.Group_id = tg.Id
 	tr.Language = inf.Language
-	tr.Source_code = inf.Language
-	// tr.Test_results
+	tr.Source_code = inf.Source
+	tr.Test_results = make([]provider.TestResult, 0)
+	if err := ExecutePython(tg, &tr); err != nil {
+		return cc.JSON(500, Message{err.Error()})
+	}
 
 	return c.JSON(200, Message{"ok"})
 }
@@ -220,27 +224,39 @@ func (srv *Server) GetResults(c echo.Context) error {
 	return cc.JSON(200, tgr)
 
 }
-func ExecutePython(tg provider.TestGroup, tr *provider.TestGroupResult) error {
+func ExecutePython(tg *provider.TestGroup, tr *provider.TestGroupResult) error {
 	f, _ := os.Create("backend/tests/prog.py")
 	f.WriteString(*tr.Source_code)
 	f.Close()
-	cmd := exec.Command("python3", "backend/tests/prog.py")
-	var out bytes.Buffer
-	cmd.Stdout = &out
 	for i, val := range tg.Tests {
-		rez := provider.TestResult{}
+		rez := provider.TestResult{Verdict: new(string), Output: new(string)}
+		id := i + 1
+		rez.Test_id = &id
+		cmd := exec.Command("timeout", strconv.FormatFloat(float64(100000000)/1000000, 'g', 1, 64), "python3", "backend/tests/prog.py")
+		var out bytes.Buffer
+		cmd.Stdout = &out
+
 		start := time.Now()
 		cmd.Stdin = bytes.NewBufferString(*val.Input)
-		if err := cmd.Run(); err != nil {
-			return err
-		}
+		err := cmd.Run()
 		duration := time.Since(start).Abs().Milliseconds()
-		id := i + 1
+		if err.Error() == "exit status 124" {
+			*rez.Verdict = "TL"
+			*rez.Output = ""
+			rez.Execution_time = &duration
+			fmt.Println(err)
+			return nil
+		} else if err != nil {
+
+		}
+
 		o := out.String()
 		rez.Output = &o
-		rez.Test_id = &id
+
 		rez.Execution_time = &duration
-		fmt.Println(rez.Execution_time)
+		// fmt.Println(*rez.Execution_time)
+
+		tr.Test_results = append(tr.Test_results, rez)
 
 	}
 
