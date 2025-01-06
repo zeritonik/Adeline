@@ -84,6 +84,7 @@ export default function ProfileSettingsForm() {
                 avatar: avatar,
                 nickname: nickname
             })
+            console.log("hui", json_data)
             loadSettings(json_data)
             setStatus(SuccessState)
         } catch (error) {
@@ -121,7 +122,7 @@ export default function ProfileSettingsForm() {
                 </FormGroup>
                 <FormGroup errors={avatar_errors}>
                     <label className="label" htmlFor="avatar">Avatar:</label>
-                    { avatar_errors !== null && avatar_errors.length === 0 && <img style={{width: '128px', height: '128px'}} src={avatar && URL.createObjectURL(avatar)} alt="You have no avatar..." />}
+                    { avatar && <img style={{width: '128px', height: '128px'}} src={typeof(avatar) === 'string' ? avatar : URL.createObjectURL(avatar)} alt="You have no avatar..." />}
                     <ErrorsGroup errors={avatar_errors} />
                     <input className="input" id="avatar" type="file" name="avatar" onChange={e => setAvatar(e.target.files[0])} />
                 </FormGroup>
