@@ -1,4 +1,4 @@
-import { profile_tests_url, profile_results_url, send_solution_url } from "./settings"
+import { profile_tests_url, profile_results_url } from "./settings"
 
 
 export async function createTestGroup(name, time_limit, memory_limit, tests) {
