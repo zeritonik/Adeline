@@ -105,7 +105,6 @@ export default function ProfileSettingsForm() {
         }
     }
 
-
     return (
         <WidgetWithState state={status}>
             <Form errors={form_errors} onSubmit={handleSubmit}>
@@ -122,9 +121,9 @@ export default function ProfileSettingsForm() {
                 </FormGroup>
                 <FormGroup errors={avatar_errors}>
                     <label className="label" htmlFor="avatar">Avatar:</label>
-                    { avatar_errors !== null && avatar_errors.length === 0 && <img style={{width: '128px', height: '128px'}} src={avatar} alt="You have no avatar..." />}
+                    { avatar_errors !== null && avatar_errors.length === 0 && <img style={{width: '128px', height: '128px'}} src={avatar && URL.createObjectURL(avatar)} alt="You have no avatar..." />}
                     <ErrorsGroup errors={avatar_errors} />
-                    <input className="input" id="avatar" type="file" name="avatar" onChange={e => setAvatar(URL.createObjectURL(e.target.files[0]))} />
+                    <input className="input" id="avatar" type="file" name="avatar" onChange={e => setAvatar(e.target.files[0])} />
                 </FormGroup>
                 <button className="btn" type="submit">Сохранить</button>
                 <button className="btn btn-neutral" type="reset" onClick={handleReset}>Сбросить</button>
