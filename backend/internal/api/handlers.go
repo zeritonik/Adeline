@@ -4,6 +4,7 @@ import (
 	"adeline/backend/internal/provider"
 	"bytes"
 	"fmt"
+	"image/png"
 	"io"
 	"mime/multipart"
 	"net/http"
@@ -119,17 +120,13 @@ func (srv *Server) PostSettings(c echo.Context) error {
 	if err != nil && err.Error() != "http: no such file" {
 		return cc.JSON(500, Message{err.Error()})
 	} else if err == nil {
-		size := file.Size
-		fmt.Println(size)
-		if err := SaveImg(file); err != nil {
-			return cc.JSON(500, Message{err.Error()})
+		if err := SaveImg(file, *cc.Login); err != nil {
+			return cc.JSON(400, Message{err.Error()})
 		}
-		path := "/media/avatars/" + file.Filename
+		path := "/media/avatars/" + *cc.Login + ".png"
 		u.Avatar = &path
 
 	}
-
-	fmt.Println(u.Avatar)
 	if err := srv.uc.ChangeSettings(u.Login, u.Password, u.Nickname, u.Avatar, *cc.UserCookie); err != nil {
 		return c.JSON(500, Message{err.Error()})
 	}
@@ -283,19 +280,50 @@ func ExecutePython(tg *provider.TestGroup, tr *provider.TestGroupResult) error {
 	return nil
 }
 
-func SaveImg(file *multipart.FileHeader) error {
+func SaveImg(file *multipart.FileHeader, login string) error {
+	//проверка формата изображения
 	src, err := file.Open()
 	if err != nil {
 		return err
 	}
 	defer src.Close()
-	path := "media/avatars/" + file.Filename
+
+	buffer := make([]byte, 512)
+	_, err = src.Read(buffer)
+	if err != nil && err != io.EOF {
+		return err
+	}
+	fileHeader, err := file.Open()
+	if err != nil {
+		return err
+	}
+	defer fileHeader.Close()
+	if http.DetectContentType(buffer) == "image/png" {
+		img, err := png.Decode(fileHeader)
+		if err != nil {
+			return err
+		}
+		if img.Bounds().Dx() != 128 && img.Bounds().Dy() != 128 {
+			return echo.NewHTTPError(400, Message{"This size is not supported"})
+		}
+	} else {
+		return echo.NewHTTPError(400, Message{"This image format is not supported."})
+
+	}
+
+	// если проверка пройдена загружаем на сервер
+	fileHeader1, err := file.Open()
+	if err != nil {
+		return err
+	}
+	defer fileHeader1.Close()
+	path := "media/avatars/" + login + ".png"
 	dst, err := os.Create(path)
 	if err != nil {
 		return err
 	}
 	defer dst.Close()
-	if _, err = io.Copy(dst, src); err != nil {
+	if _, err = io.Copy(dst, fileHeader1); err != nil {
 		return err
 	}
 	return nil
