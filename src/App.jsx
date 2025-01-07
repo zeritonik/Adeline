@@ -34,6 +34,10 @@ export default function App() {
         }
     })() } , []);
 
+    useEffect(() => {
+        console.log("БЛЯЯЯЯЯЯЯЯЯЯЯЯЯЯЯЯЯЯЯЯЯЯЯЯЯЯЯЯЯЯЯЯЯЯЯЯЯЯ")
+    }, [user])
+
     return (
         <UserContext.Provider value={[ user, setUser ]}>
             <Routes>

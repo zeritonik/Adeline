@@ -1,4 +1,4 @@
-import { useState, useContext } from "react";
+import { useState, useContext, useEffect } from "react";
 import { Link } from "react-router-dom";
 
 import { UserContext } from "../App";
@@ -26,13 +26,12 @@ function HeaderProfileMenu() {
 
 export default function HeaderProfile() {
     const [user] = useContext(UserContext);
-    console.log(user)
     const [open, setOpen] = useState(false);
     return (
         <div className={open ? "header__profile open" : "header__profile"}
              onMouseEnter={() => setOpen(true)} onMouseLeave={() => setOpen(false)}>
             <div className="header__profile__avatar">
-                {user && user.avatar && <img className="avatar-small" src={user.avatar} alt="" />} 
+                {user && user.avatar && <img key={user} className="avatar-small" src={user.avatar} alt="" />} 
             </div>
            <HeaderProfileMenu />
         </div>
