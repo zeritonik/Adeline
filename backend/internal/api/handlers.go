@@ -74,7 +74,11 @@ func (srv *Server) PostLogin(c echo.Context) error {
 		return cc.JSON(401, Message{err.Error()})
 	}
 	c.SetCookie(&http.Cookie{Value: cookieval, Name: "astiay_isos", MaxAge: 3600})
-	return c.JSON(200, u.UserInf)
+	us, err := srv.uc.GetUser(cookieval)
+	if err != nil {
+		return c.JSON(500, Message{err.Error()})
+	}
+	return c.JSON(200, us)
 }
 
 func (srv *Server) GetSettings(c echo.Context) error {
@@ -112,15 +116,20 @@ func (srv *Server) PostSettings(c echo.Context) error {
 		return cc.JSON(400, Message{err.Error()})
 	}
 	file, err := cc.FormFile("avatar")
-	if err != nil {
+	if err != nil && err.Error() != "http: no such file" {
 		return cc.JSON(500, Message{err.Error()})
+	} else if err == nil {
+		size := file.Size
+		fmt.Println(size)
+		if err := SaveImg(file); err != nil {
+			return cc.JSON(500, Message{err.Error()})
+		}
+		path := "/media/avatars/" + file.Filename
+		u.Avatar = &path
+
 	}
-	if err := SaveImg(file); err != nil {
-		return cc.JSON(500, Message{err.Error()})
-	}
-	path := "/media/avatars/" + file.Filename
-	u.Avatar = &path
-	fmt.Println(*u.Avatar)
+
+	fmt.Println(u.Avatar)
 	if err := srv.uc.ChangeSettings(u.Login, u.Password, u.Nickname, u.Avatar, *cc.UserCookie); err != nil {
 		return c.JSON(500, Message{err.Error()})
 	}
