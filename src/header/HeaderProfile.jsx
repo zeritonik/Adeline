@@ -25,12 +25,14 @@ function HeaderProfileMenu() {
 }
 
 export default function HeaderProfile() {
+    const [user] = useContext(UserContext);
+    console.log(user)
     const [open, setOpen] = useState(false);
     return (
         <div className={open ? "header__profile open" : "header__profile"}
              onMouseEnter={() => setOpen(true)} onMouseLeave={() => setOpen(false)}>
             <div className="header__profile__avatar">
-                <img src="img/user.svg" alt="" />   
+                {user && user.avatar && <img className="avatar-small" src={user.avatar} alt="" />} 
             </div>
            <HeaderProfileMenu />
         </div>

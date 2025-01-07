@@ -1,4 +1,6 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useContext } from "react";
+
+import { UserContext } from "../App";
 
 import { getProfileSettings, postProfileSettings } from "../api/profile";
 import { NoneState, LoadingState, SuccessState, ErrorState, WidgetWithState } from "../WidgetWithState";
@@ -23,56 +25,57 @@ function validateNickName(nickname) {
     return errors
 }
 
-function validateAvatar(avatar) {
-    if (avatar === null) {
-        return null
+async function processAvatar(avatar, avatar_url, setAvatarUrl) {
+    if (avatar_url) {
+        URL.revokeObjectURL(avatar_url)
     }
-    let errors = []
-    return errors
+
+    if (typeof(avatar) === "string") {
+        setAvatarUrl(avatar)
+        return 
+    }
+
+    if (typeof(avatar) === "object" && avatar instanceof File) {
+        const img = new Image();
+        img.src = URL.createObjectURL(avatar);
+        img.onload = () => {
+            const canvas = document.createElement('canvas');
+            canvas.width = 128;
+            canvas.height = 128;
+    
+            const ctx = canvas.getContext('2d');
+            ctx.drawImage(img, 0, 0, 128, 128);
+            setAvatarUrl(canvas.toDataURL())
+        }
+        return
+    }
 }
 
 
 export default function ProfileSettingsForm() {
-    const [login, setLogin] = useState('')
+    const [user, setUser] = useContext(UserContext);
 
-    const [nickname, setNickName] = useState('');
+    console.log(user)
+    const [login] = useState(user.login)
+
+    const [nickname, setNickName] = useState(user.nickname);
     const [nickname_errors, setNicknameErrors] = useState(null);
     useEffect(() => {setNicknameErrors(validateNickName(nickname))}, [nickname])
 
-    const [avatar, setAvatar] = useState(null);
-    const [avatar_errors, setAvatarErrors] = useState(null);
-    useEffect(() => {setAvatarErrors(validateAvatar(avatar))}, [avatar])
-    console.log(avatar)
+    const [avatar_file, setAvatarFile] = useState(user.avatar);
+    const [avatar_url, setAvatarUrl] = useState(null);
+    useEffect(() => { processAvatar(avatar_file, avatar_url, setAvatarUrl) }, [avatar_file])
 
     const [form_errors, setFormErrors] = useState(null);
-    useEffect(() => {setFormErrors(validateForm(nickname, avatar))}, [nickname, avatar])
-    const [status, setStatus] = useState(NoneState);
+    useEffect(() => {setFormErrors(validateForm(nickname, avatar_file))}, [nickname, avatar_file])
 
-    useEffect(() => {
-        const func = async () => {
-            setStatus(LoadingState)
-            try {
-                const json_data = await getProfileSettings()
-                loadSettings(json_data)
-                setStatus(SuccessState)
-            } catch (error) {
-                setStatus(ErrorState)
-            }
-        }
-        func()
-    }, [])
-
-    function loadSettings(settings) {
-        setLogin(settings.login)
-        setNickName(settings.nickname)
-        setAvatar(settings.avatar)
-    }
+    const [status, setStatus] = useState(SuccessState);
 
     async function handleSubmit(e) {
         e.preventDefault();
         if (
-            form_errors === null || nickname_errors === null || avatar_errors === null ||
-            form_errors.length > 0 || nickname_errors.length > 0 || avatar_errors.length > 0
+            form_errors === null || nickname_errors === null ||
+            form_errors.length > 0 || nickname_errors.length > 0
         ) {
             return;
         }
@@ -81,11 +84,10 @@ export default function ProfileSettingsForm() {
         try {
             const json_data = await postProfileSettings({ 
                 login: login,
-                avatar: avatar,
+                avatar: await fetch(avatar_url).then(res => res.blob()),
                 nickname: nickname
             })
-            console.log("hui", json_data)
-            loadSettings(json_data)
+            setUser(json_data)
             setStatus(SuccessState)
         } catch (error) {
             setFormErrors(["Registration error " + error])
@@ -99,7 +101,7 @@ export default function ProfileSettingsForm() {
         setStatus(LoadingState)
         try {
             const json_data = await getProfileSettings()
-            loadSettings(json_data)
+            setUser(json_data)
             setStatus(SuccessState)
         } catch (error) {
             setStatus(ErrorState)
@@ -120,11 +122,10 @@ export default function ProfileSettingsForm() {
                     <ErrorsGroup errors={nickname_errors} />
                     <input className="input" id="nickname" type="text" name="nickname" value={nickname} onChange={e => setNickName(e.target.value)} />
                 </FormGroup>
-                <FormGroup errors={avatar_errors}>
+                <FormGroup>
                     <label className="label" htmlFor="avatar">Avatar:</label>
-                    { avatar && <img style={{width: '128px', height: '128px'}} src={typeof(avatar) === 'string' ? avatar : URL.createObjectURL(avatar)} alt="You have no avatar..." />}
-                    <ErrorsGroup errors={avatar_errors} />
-                    <input className="input" id="avatar" type="file" name="avatar" onChange={e => setAvatar(e.target.files[0])} />
+                    { avatar_url && <img className="avatar" src={avatar_url} alt="You have no avatar..." /> }
+                    <input className="input" id="avatar" type="file" name="avatar" onChange={e => setAvatarFile(e.target.files[0])} />
                 </FormGroup>
                 <button className="btn" type="submit">Сохранить</button>
                 <button className="btn btn-neutral" type="reset" onClick={handleReset}>Сбросить</button>

@@ -288,3 +288,16 @@ a:hover {
     gap: 0.5rem;
     list-style-type: none;
 }
+
+/* avatar image */
+.avatar {
+    width: 128px;
+    height: 128px;
+    border-radius: 50%;
+}
+
+.avatar-small {
+    width: 64px;
+    height: 64px;
+    border-radius: 50%;
+}
