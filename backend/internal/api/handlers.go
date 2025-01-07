@@ -271,8 +271,6 @@ func ExecutePython(tg *provider.TestGroup, tr *provider.TestGroupResult) error {
 		rez.Output = &o
 
 		rez.Execution_time = &duration
-		// fmt.Println(*rez.Execution_time)
-
 		tr.Test_results = append(tr.Test_results, rez)
 
 	}
@@ -287,19 +285,14 @@ func SaveImg(file *multipart.FileHeader, login string) error {
 		return err
 	}
 	defer src.Close()
-
 	buffer := make([]byte, 512)
 	_, err = src.Read(buffer)
 	if err != nil && err != io.EOF {
 		return err
 	}
-	fileHeader, err := file.Open()
-	if err != nil {
-		return err
-	}
-	defer fileHeader.Close()
+	src.Seek(0, 0)
 	if http.DetectContentType(buffer) == "image/png" {
-		img, err := png.Decode(fileHeader)
+		img, err := png.Decode(src)
 		if err != nil {
 			return err
 		}
@@ -312,18 +305,14 @@ func SaveImg(file *multipart.FileHeader, login string) error {
 	}
 
 	// если проверка пройдена загружаем на сервер
-	fileHeader1, err := file.Open()
-	if err != nil {
-		return err
-	}
-	defer fileHeader1.Close()
+	src.Seek(0, 0)
 	path := "media/avatars/" + login + ".png"
 	dst, err := os.Create(path)
 	if err != nil {
 		return err
 	}
 	defer dst.Close()
-	if _, err = io.Copy(dst, fileHeader1); err != nil {
+	if _, err = io.Copy(dst, src); err != nil {
 		return err
 	}
 	return nil

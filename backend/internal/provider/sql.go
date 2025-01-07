@@ -60,6 +60,7 @@ func (dp *DatabaseProvider) GetUserInf(cookie string) (user *UserInf, err error)
 		Login:    new(string),
 		Nickname: new(string),
 		Avatar:   new(string)}
+
 	if err := row.Scan(u.Login, u.Avatar, u.Nickname); err != nil {
 		return nil, err
 	}
@@ -199,7 +200,6 @@ func (dp *DatabaseProvider) GetTestGroupResultInfo(login string) ([]TestGroupRes
 		rows.Scan(tg.Id, tg.Group_id, tg.Language, tg.Max_execution_time, tg.Max_memory, tg.Source_code, &str, tg.Verdict)
 		tg.Test_results = ConvertToStrArr(str)
 		tgr = append(tgr, tg)
-
 	}
 	return tgr, nil
 }
