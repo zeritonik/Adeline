@@ -209,9 +209,19 @@ func (srv *Server) SendCode(c echo.Context) error {
 	tr.Language = inf.Language
 	tr.Source_code = inf.Source
 	tr.Test_results = make([]provider.TestResult, 0)
-	if err := ExecutePython(tg, &tr); err != nil {
-		return cc.JSON(500, Message{err.Error()})
+	switch *inf.Language {
+	case "python":
+		if err := ExecutePython(tg, &tr); err != nil {
+			return cc.JSON(500, Message{err.Error()})
+		}
+	case "go":
+		if err := ExecuteGO(tg, &tr); err != nil {
+			return cc.JSON(500, Message{err.Error()})
+		}
+	default:
+		return cc.JSON(400, Message{"Not supported language"})
 	}
+
 	if err := srv.uc.AddTestGroupResult(tr); err != nil {
 		return cc.JSON(500, Message{err.Error()})
 	}
@@ -290,7 +300,51 @@ func ExecutePython(tg *provider.TestGroup, tr *provider.TestGroupResult) error {
 	}
 	return nil
 }
+func ExecuteGO(tg *provider.TestGroup, tr *provider.TestGroupResult) error {
+	path := "backend/tests/" + *tg.Author + "_prog.go"
+	f, _ := os.Create(path)
+	f.WriteString(*tr.Source_code)
+	f.Close()
+	var maxTime int64 = 0
+	maxMemory := 0
+	flag := "OK"
+	for i, val := range tg.Tests {
+		rez := provider.TestResult{}
+		id := i + 1
+		rez.Test_id = &id
+		cmd := exec.Command("go", "run", "backend/scripts/time_mem_run.go")
+		cmd.Stdin = bytes.NewBufferString(path + " " + strconv.Itoa(*tg.Memory_limit) + " " + strconv.Itoa(*tg.Time_limit) + "\n" + *val.Input + "\n#\n" + *val.Correct_output + "\n#")
+		output, err := cmd.Output()
+		if err != nil {
+			return err
+		}
 
+		out := strings.Split(string(output[:]), "\n")
+		fmt.Println(out)
+
+		if out[0] != "OK" {
+			flag = out[0]
+		}
+		rez.Verdict = &out[0]
+		rez.Output = &out[2]
+		t, _ := strconv.ParseInt(out[8], 10, 64)
+		rez.Execution_time = &t
+		m, _ := strconv.Atoi(out[6])
+		fmt.Println(m)
+		rez.Max_memory = &m
+		maxMemory = max(maxMemory, *rez.Max_memory)
+		maxTime = max(maxTime, *rez.Execution_time)
+
+		tr.Test_results = append(tr.Test_results, rez)
+	}
+	tr.Max_memory = &maxMemory
+	tr.Max_execution_time = &maxTime
+	tr.Verdict = &flag
+	if err := os.Remove(path); err != nil {
+		return err
+	}
+	return nil
+}
 func SaveImg(file *multipart.FileHeader, login string) error {
 	src, err := file.Open()
 	if err != nil {
