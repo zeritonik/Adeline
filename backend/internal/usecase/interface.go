@@ -21,4 +21,5 @@ type DatabaseProvider interface {
 	GetTestGroupInfoLOGIN(login string) ([]provider.TestGroup, error)
 	DeleteTestGroup(id int, login string) error
 	GetTestGroupResultInfo(login string) ([]provider.TestGroupResult, error)
+	InsertTestGroupRezult(tg provider.TestGroupResult) (error, map[provider.TestResult]error)
 }

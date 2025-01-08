@@ -93,18 +93,18 @@ func (u *Usecase) AddTestGroup(tg provider.TestGroup) (error, *int) {
 	return nil, &id
 }
 
-// func (u *Usecase) AddTestGroupResult(tg provider.TestGroup) error {
-// 	err, e := u.p.InsertTestGroup(tg)
-// 	if err != nil {
-// 		return err
-// 	}
-// 	for key, val := range e {
-// 		if val != nil {
-// 			return errors.New(string(*key.Id) + val.Error())
-// 		}
-// 	}
-// 	return nil
-// }
+func (u *Usecase) AddTestGroupResult(tg provider.TestGroupResult) error {
+	err, e := u.p.InsertTestGroupRezult(tg)
+	if err != nil {
+		return err
+	}
+	for key, val := range e {
+		if val != nil {
+			return errors.New(string(*key.Test_id) + val.Error())
+		}
+	}
+	return nil
+}
 
 func (u *Usecase) GetTestGroup(id int) (*provider.TestGroup, error) {
 	return u.p.GetTestGroupInfo(id)

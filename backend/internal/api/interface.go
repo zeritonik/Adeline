@@ -18,6 +18,7 @@ type Usecase interface {
 	GetTestGroupwithLogin(login string) ([]provider.TestGroup, error)
 	DeleteTestGroup(login string, id int) error
 	GetTestGroupResult(login string) ([]provider.TestGroupResult, error)
+	AddTestGroupResult(tg provider.TestGroupResult) error
 }
 
 type Message struct {

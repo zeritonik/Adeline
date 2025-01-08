@@ -2,6 +2,8 @@ import subprocess
 import psutil
 import time
 import argparse
+
+import sys
 import os
 
 
@@ -48,7 +50,10 @@ class Tester:
     
     def print_test_result(self):
         print(self.test_result)
-        print(self.total_time, self.max_memory)
+        print("---total time")
+        print(self.total_time)
+        print("---total memory")
+        print(self.max_memory)
 
         print("---Exit code:", self.exit_code)
 
@@ -60,9 +65,6 @@ class Tester:
 
         print("---Error output:")
         print(self.err_output)
-
-        print("---Directory:")
-        print(os.getcwd())
 
 
     def run_command(self, command):
@@ -76,7 +78,7 @@ class Tester:
             time.sleep(0.01)
 
             self.total_time = round((time.time() - start_time) * 1000)
-            self.max_memory = max(self.max_memory, psutil.Process(process.pid).memory_info().rss // 1024)
+            self.max_memory = max(self.max_memory, psutil.Process(process.pid).memory_info().rss // 1024 // 1024)
             if self.memory_limit < self.max_memory or self.time_limit < self.total_time:
                 process.kill()
 
@@ -108,7 +110,6 @@ class Tester:
 
 
 if __name__ == "__main__":
-    print(os.listdir())
     parser = argparse.ArgumentParser()
     parser.print_help = lambda: print(
             "Usage: python3 time_mem_run.py -t <time limit> -m <memory limit> [-v] <command>",
@@ -118,7 +119,7 @@ if __name__ == "__main__":
             Tester.INPUT_STOP_SYMBOL,
             "You will get",
             "<verdict>",
-            "<total spent time(ms)> <max spent memory(kb)>",
+            "<total spent time(ms)> <max spent memory(mb)>",
             "---Exit code: <exit code>",
             "---Correct output:",
             "<Correct output>",
@@ -138,7 +139,6 @@ if __name__ == "__main__":
     memory_limit = args.memory
     verbose = args.verbose
     command = args.command
-
     if (verbose):
         print("Will run:", command)
         print("Time limit: " + str(time_limit))

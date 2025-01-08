@@ -212,6 +212,9 @@ func (srv *Server) SendCode(c echo.Context) error {
 	if err := ExecutePython(tg, &tr); err != nil {
 		return cc.JSON(500, Message{err.Error()})
 	}
+	if err := srv.uc.AddTestGroupResult(tr); err != nil {
+		return cc.JSON(500, Message{err.Error()})
+	}
 
 	return c.JSON(200, Message{"ok"})
 }
@@ -249,32 +252,42 @@ func ExecutePython(tg *provider.TestGroup, tr *provider.TestGroupResult) error {
 	f, _ := os.Create(path)
 	f.WriteString(*tr.Source_code)
 	f.Close()
-	// fmt.Print(os.Executable())
-	// fmt.Print(os.ReadDir("./"))
-	// fmt.Print(os.ReadDir("./backend/"))
-	fmt.Print(os.ReadDir("./backend/scripts"))
+	var maxTime int64 = 0
+	maxMemory := 0
+	flag := "OK"
 	for i, val := range tg.Tests {
-		rez := provider.TestResult{Verdict: new(string), Output: new(string)}
+		rez := provider.TestResult{}
 		id := i + 1
 		rez.Test_id = &id
-		cmd := exec.Command("python3 " + "backend/scripts/time_mem_run.py " + " -t " + strconv.Itoa(*tg.Time_limit) + " -m " + strconv.Itoa(*tg.Memory_limit) + path)
-		var out bytes.Buffer
-		cmd.Stdout = &out
-		input := *val.Input + "\n$$\n" + *val.Correct_output + "\n$$"
-		cmd.Stdin = bytes.NewBufferString(input)
-		if err := cmd.Run(); err != nil {
+		cmd := exec.Command("python3", "backend/scripts/time_mem_run.py", "-t", strconv.Itoa(*tg.Time_limit), "-m", strconv.Itoa(*tg.Memory_limit), "python3", path)
+		cmd.Stdin = bytes.NewBufferString(*val.Input + "\n$$\n" + *val.Correct_output + "\n$$")
+		output, err := cmd.Output()
+		if err != nil {
 			return err
 		}
-		o := out.String()
-		fmt.Print(o)
-		rez.Output = &o
-		tr.Test_results = append(tr.Test_results, rez)
 
+		out := strings.Split(string(output[:]), "\n")
+
+		if out[0] != "OK" {
+			flag = out[0]
+		}
+		rez.Verdict = &out[0]
+		rez.Output = &out[9]
+		t, _ := strconv.ParseInt(out[2], 10, 64)
+		rez.Execution_time = &t
+		m, _ := strconv.Atoi(out[4])
+		rez.Max_memory = &m
+		maxMemory = max(maxMemory, *rez.Max_memory)
+		maxTime = max(maxTime, *rez.Execution_time)
+
+		tr.Test_results = append(tr.Test_results, rez)
 	}
+	tr.Max_memory = &maxMemory
+	tr.Max_execution_time = &maxTime
+	tr.Verdict = &flag
 	if err := os.Remove(path); err != nil {
 		return err
 	}
-
 	return nil
 }
 

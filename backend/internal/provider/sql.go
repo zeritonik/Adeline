@@ -1,6 +1,7 @@
 package provider
 
 import (
+	"fmt"
 	"log"
 	"strconv"
 	"strings"
@@ -105,8 +106,10 @@ func (dp *DatabaseProvider) InsertTestGroup(tg TestGroup) (error, map[Test]error
 	}
 
 	e := make(map[Test]error)
-	for _, val := range tg.Tests {
-		if _, err := dp.db.Exec(`update test_group set tests = array_append(tests,($1,$2,$3)::test) where id = $4 `, val.Id, val.Input, val.Correct_output, id); err != nil {
+	for i, val := range tg.Tests {
+		d := (i + 1)
+		fmt.Println(d)
+		if _, err := dp.db.Exec(`update test_group set tests = array_append(tests,($1,$2,$3)::test) where id = $4 `, d, val.Input, val.Correct_output, id); err != nil {
 			e[val] = err
 		} else {
 			e[val] = nil
@@ -126,11 +129,13 @@ func (dp *DatabaseProvider) GetTestGroupInfo(id int) (*TestGroup, error) {
 		rez := strings.Split(val, ",")
 		tg.Tests = append(tg.Tests, Test{Id: new(int), Input: new(string), Correct_output: new(string)})
 		id, _ = (strconv.Atoi(strings.Trim(rez[0], "(")))
-		tg.Tests[i].Id = &id
+
+		tg.Tests[i].Id = new(int)
+		*tg.Tests[i].Id = id
 		input := strings.Trim(rez[1], "\"")
-		tg.Tests[i].Input = &input
+		*tg.Tests[i].Input = input
 		output := strings.Trim(strings.Trim(rez[2], ")"), "\"")
-		tg.Tests[i].Correct_output = &output
+		*tg.Tests[i].Correct_output = output
 	}
 	return &tg, nil
 }
@@ -163,23 +168,23 @@ func (dp *DatabaseProvider) GetTestGroupInfoLOGIN(login string) ([]TestGroup, er
 	return arrtg, nil
 }
 
-// func (dp *DatabaseProvider) InsertTestGroupRezult(tg TestGroupResult) (error, map[TestResult]error) {
-// 	var id int
-// 	row := dp.db.QueryRow(`insert into test_group_result (group_id,source_code,language,verdict,max_execution_time,max_memory) values ($1,$2,$3,$4,$5,$6) returning id;`, tg.Group_id, tg.Source_code, tg.Language, tg.Verdict, tg.Max_execution_time, tg.Max_memory)
-// 	if err := row.Scan(&id); err != nil {
-// 		return err, nil
-// 	}
+func (dp *DatabaseProvider) InsertTestGroupRezult(tg TestGroupResult) (error, map[TestResult]error) {
+	var id int
+	row := dp.db.QueryRow(`insert into test_group_result (group_id,source_code,language,verdict,max_execution_time,max_memory) values ($1,$2,$3,$4,$5,$6) returning id;`, tg.Group_id, tg.Source_code, tg.Language, tg.Verdict, tg.Max_execution_time, tg.Max_memory)
+	if err := row.Scan(&id); err != nil {
+		return err, nil
+	}
 
-// 	e := make(map[TestResult]error)
-// 	for _, val := range *tg.Test_results {
-// 		if _, err := dp.db.Exec(`update test_group set tests = array_append(tests,($1,$2,$3,$4,$5)::test_result) where id = $6 `, val.Test_id, val.Output, val.Execution_time, val.Verdict, val.Max_memory, id); err != nil {
-// 			e[val] = err
-// 		} else {
-// 			e[val] = nil
-// 		}
-// 	}
-// 	return nil, e
-// }
+	e := make(map[TestResult]error)
+	for _, val := range tg.Test_results {
+		if _, err := dp.db.Exec(`update test_group_result set results = array_append(results,($1,$2,$3,$4,$5)::test_result) where id = $6 `, val.Test_id, val.Output, val.Verdict, val.Execution_time, val.Max_memory, id); err != nil {
+			e[val] = err
+		} else {
+			e[val] = nil
+		}
+	}
+	return nil, e
+}
 
 func (dp *DatabaseProvider) DeleteTestGroup(id int, login string) error {
 	if _, err := dp.db.Exec(`delete from test_group where author = $1 and id = $2`, login, id); err != nil {
@@ -196,7 +201,7 @@ func (dp *DatabaseProvider) GetTestGroupResultInfo(login string) ([]TestGroupRes
 	}
 	for rows.Next() {
 		var str string
-		tg := TestGroupResult{Id: new(int), Group_id: new(int), Source_code: new(string), Language: new(string), Verdict: new(string), Max_execution_time: new(int), Max_memory: new(int), Test_results: make([]TestResult, 0), String_results: make([]string, 0)}
+		tg := TestGroupResult{Id: new(int), Group_id: new(int), Source_code: new(string), Language: new(string), Verdict: new(string), Max_execution_time: new(int64), Max_memory: new(int), Test_results: make([]TestResult, 0), String_results: make([]string, 0)}
 		rows.Scan(tg.Id, tg.Group_id, tg.Language, tg.Max_execution_time, tg.Max_memory, tg.Source_code, &str, tg.Verdict)
 		tg.Test_results = ConvertToStrArr(str)
 		tgr = append(tgr, tg)
@@ -208,17 +213,17 @@ func ConvertToStrArr(str string) []TestResult {
 	arr := strings.Split(str, "\",\"")
 	tr := make([]TestResult, 0)
 	for i := range arr {
-		t := TestResult{}
+		t := TestResult{Test_id: new(int), Output: new(string), Verdict: new(string), Execution_time: new(int64), Max_memory: new(int)}
 		arr[i] = strings.Trim(arr[i], "{\"(")
 		arr[i] = strings.Trim(arr[i], ")\"}")
 		temp := strings.Split(arr[i], ",")
 		tmp, _ := strconv.Atoi(temp[0])
-		t.Test_id = &tmp
-		t.Output = &temp[1]
-		t.Verdict = &temp[2]
+		*t.Test_id = tmp
+		*t.Output = temp[1]
+		*t.Verdict = temp[2]
 		te, _ := strconv.ParseInt(temp[3], 10, 64)
-		t.Execution_time = &te
-		tmp, _ = strconv.Atoi(temp[4])
+		*t.Execution_time = te
+		// tmp, _ = strconv.Atoi(temp[4])
 		tr = append(tr, t)
 	}
 	return tr

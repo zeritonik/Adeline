@@ -51,7 +51,7 @@ type TestGroupResult struct {
 	Language           *string      `json:"language"`
 	Test_results       []TestResult `json:"verdicts"`
 	Verdict            *string      `json:"verdict"`
-	Max_execution_time *int         `json:"max_execution_time"`
+	Max_execution_time *int64       `json:"max_execution_time"`
 	Max_memory         *int         `json:"max_memory"`
 	String_results     []string     `json:"results"`
 }
