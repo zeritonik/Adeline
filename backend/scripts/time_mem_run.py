@@ -2,6 +2,7 @@ import subprocess
 import psutil
 import time
 import argparse
+import os
 
 
 class Tester:
@@ -60,6 +61,9 @@ class Tester:
         print("---Error output:")
         print(self.err_output)
 
+        print("---Directory:")
+        print(os.getcwd())
+
 
     def run_command(self, command):
         process = subprocess.Popen(command, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
@@ -104,6 +108,7 @@ class Tester:
 
 
 if __name__ == "__main__":
+    print(os.listdir())
     parser = argparse.ArgumentParser()
     parser.print_help = lambda: print(
             "Usage: python3 time_mem_run.py -t <time limit> -m <memory limit> [-v] <command>",

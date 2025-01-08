@@ -245,15 +245,19 @@ func (srv *Server) GetResults(c echo.Context) error {
 
 }
 func ExecutePython(tg *provider.TestGroup, tr *provider.TestGroupResult) error {
-	path := "/backend/tests/" + *tg.Author + "prog.py"
+	path := "backend/tests/" + *tg.Author + "_prog.py"
 	f, _ := os.Create(path)
 	f.WriteString(*tr.Source_code)
 	f.Close()
+	// fmt.Print(os.Executable())
+	// fmt.Print(os.ReadDir("./"))
+	// fmt.Print(os.ReadDir("./backend/"))
+	fmt.Print(os.ReadDir("./backend/scripts"))
 	for i, val := range tg.Tests {
 		rez := provider.TestResult{Verdict: new(string), Output: new(string)}
 		id := i + 1
 		rez.Test_id = &id
-		cmd := exec.Command("python3 " + "/backend/scripts/time_mem_run.py " + "-t " + strconv.Itoa(*tg.Time_limit) + " -m " + strconv.Itoa(*tg.Memory_limit) + " python3 " + path)
+		cmd := exec.Command("python3 " + "backend/scripts/time_mem_run.py " + " -t " + strconv.Itoa(*tg.Time_limit) + " -m " + strconv.Itoa(*tg.Memory_limit) + path)
 		var out bytes.Buffer
 		cmd.Stdout = &out
 		input := *val.Input + "\n$$\n" + *val.Correct_output + "\n$$"
