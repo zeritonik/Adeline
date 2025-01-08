@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"image/png"
 	"io"
+	"log"
 	"mime/multipart"
 	"net/http"
 	"os"
@@ -120,12 +121,17 @@ func (srv *Server) PostSettings(c echo.Context) error {
 	if err != nil && err.Error() != "http: no such file" {
 		return cc.JSON(500, Message{err.Error()})
 	} else if err == nil {
+		if *cc.Avatar != "" {
+			err := os.Remove("." + *cc.Avatar)
+			if err != nil {
+				log.Fatal(err)
+			}
+		}
 		if err := SaveImg(file, *cc.Login); err != nil {
 			return cc.JSON(400, Message{err.Error()})
 		}
-		path := "/media/avatars/" + *cc.Login + ".png"
+		path := "/media/avatars/" + *cc.Login + "_" + time.Now().Format("2006-01-02-15-04-05") + ".png"
 		u.Avatar = &path
-
 	}
 	if err := srv.uc.ChangeSettings(u.Login, u.Password, u.Nickname, u.Avatar, *cc.UserCookie); err != nil {
 		return c.JSON(500, Message{err.Error()})
@@ -198,9 +204,6 @@ func (srv *Server) SendCode(c echo.Context) error {
 	if err != nil {
 		return cc.JSON(400, Message{err.Error()})
 	}
-	// fmt.Println(*tg.Author)
-	// fmt.Println(*inf.Language)
-	// fmt.Println(*inf.Source)
 	tr := provider.TestGroupResult{}
 	tr.Group_id = tg.Id
 	tr.Language = inf.Language
@@ -242,44 +245,36 @@ func (srv *Server) GetResults(c echo.Context) error {
 
 }
 func ExecutePython(tg *provider.TestGroup, tr *provider.TestGroupResult) error {
-	f, _ := os.Create("backend/tests/prog.py")
+	path := "/backend/tests/" + *tg.Author + "prog.py"
+	f, _ := os.Create(path)
 	f.WriteString(*tr.Source_code)
 	f.Close()
 	for i, val := range tg.Tests {
 		rez := provider.TestResult{Verdict: new(string), Output: new(string)}
 		id := i + 1
 		rez.Test_id = &id
-		cmd := exec.Command("timeout", strconv.FormatFloat(float64(100000000)/1000000, 'g', 1, 64), "python3", "backend/tests/prog.py")
+		cmd := exec.Command("python3 " + "/backend/scripts/time_mem_run.py " + "-t " + strconv.Itoa(*tg.Time_limit) + " -m " + strconv.Itoa(*tg.Memory_limit) + " python3 " + path)
 		var out bytes.Buffer
 		cmd.Stdout = &out
-
-		start := time.Now()
-		cmd.Stdin = bytes.NewBufferString(*val.Input)
-		err := cmd.Run()
-		duration := time.Since(start).Abs().Milliseconds()
-		if err.Error() == "exit status 124" {
-			*rez.Verdict = "TL"
-			*rez.Output = ""
-			rez.Execution_time = &duration
-			fmt.Println(err)
-			return nil
-		} else if err != nil {
-
+		input := *val.Input + "\n$$\n" + *val.Correct_output + "\n$$"
+		cmd.Stdin = bytes.NewBufferString(input)
+		if err := cmd.Run(); err != nil {
+			return err
 		}
-
 		o := out.String()
+		fmt.Print(o)
 		rez.Output = &o
-
-		rez.Execution_time = &duration
 		tr.Test_results = append(tr.Test_results, rez)
 
+	}
+	if err := os.Remove(path); err != nil {
+		return err
 	}
 
 	return nil
 }
 
 func SaveImg(file *multipart.FileHeader, login string) error {
-	//проверка формата изображения
 	src, err := file.Open()
 	if err != nil {
 		return err
@@ -304,9 +299,8 @@ func SaveImg(file *multipart.FileHeader, login string) error {
 
 	}
 
-	// если проверка пройдена загружаем на сервер
 	src.Seek(0, 0)
-	path := "media/avatars/" + login + ".png"
+	path := "media/avatars/" + login + "_" + time.Now().Format("2006-01-02-15-04-05") + ".png"
 	dst, err := os.Create(path)
 	if err != nil {
 		return err
