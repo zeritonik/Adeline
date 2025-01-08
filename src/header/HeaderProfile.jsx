@@ -30,9 +30,7 @@ export default function HeaderProfile() {
     return (
         <div className={open ? "header__profile open" : "header__profile"}
              onMouseEnter={() => setOpen(true)} onMouseLeave={() => setOpen(false)}>
-            <div className="header__profile__avatar">
-                {user && user.avatar && <img key={user} className="avatar-small" src={user.avatar} alt="" />} 
-            </div>
+            {user && user.avatar && <img key={user} className="header__profile__avatar avatar-small" src={user.avatar} alt="" />}
            <HeaderProfileMenu />
         </div>
     );

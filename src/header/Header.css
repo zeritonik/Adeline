@@ -19,6 +19,7 @@
 
 
 .header__profile__avatar {
+    box-sizing: content-box;
     border-radius: 50%;
     box-shadow: 0 0 0.5rem var(--main-font-color);
     transition: box-shadow 0.2s ease-in-out;
