@@ -45,7 +45,7 @@ async function processAvatar(avatar, avatar_url, setAvatarUrl) {
     
             const ctx = canvas.getContext('2d');
             ctx.drawImage(img, 0, 0, 128, 128);
-            setAvatarUrl(canvas.toDataURL())
+            setAvatarUrl(canvas.toDataURL("image/png"));
         }
         return
     }
@@ -55,8 +55,7 @@ async function processAvatar(avatar, avatar_url, setAvatarUrl) {
 export default function ProfileSettingsForm() {
     const [user, setUser] = useContext(UserContext);
 
-    console.log(user)
-    const [login] = useState(user.login)
+    const [login, setLogin] = useState(user.login)
 
     const [nickname, setNickName] = useState(user.nickname);
     const [nickname_errors, setNicknameErrors] = useState(null);
@@ -70,6 +69,12 @@ export default function ProfileSettingsForm() {
     useEffect(() => {setFormErrors(validateForm(nickname, avatar_file))}, [nickname, avatar_file])
 
     const [status, setStatus] = useState(SuccessState);
+
+    useEffect(() => {
+        setLogin(user.login);
+        setNickName(user.nickname);
+        setAvatarFile(user.avatar);
+    }, [user]);
 
     async function handleSubmit(e) {
         e.preventDefault();
