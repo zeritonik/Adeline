@@ -68,7 +68,7 @@ export default function TestGroupCreationForm( {onSuccess=() => {}, onError=() =
     const [memory_limit_errors, setMemoryLimitErrors] = useState(null);
     useEffect(() => {setMemoryLimitErrors(validateMemoryLimit(memory_limit))}, [memory_limit])
 
-    const [ test_id, setTestId ] = useState(0);
+    const [ test_id, setTestId ] = useState(1);
     const [ tests, setTests ] = useState([]);
     const [ tests_errors, setTestsErrors ] = useState(null);
     useEffect(() => {setTestsErrors(validateTests(tests))}, [tests])
@@ -120,7 +120,7 @@ export default function TestGroupCreationForm( {onSuccess=() => {}, onError=() =
             <FormGroup errors={memory_limit_errors}>
                 <label className="label" htmlFor="memory_limit">Memory limit</label>
                 <ErrorsGroup errors={memory_limit_errors} />
-                <input type="text" placeholder="memory limit in kb" id="memory_limit" className="input" value={memory_limit} onChange={e => setMemoryLimit(e.target.value)} />
+                <input type="text" placeholder="memory limit in mb" id="memory_limit" className="input" value={memory_limit} onChange={e => setMemoryLimit(e.target.value)} />
             </FormGroup>
             <FormGroup errors={null}>
                 <label className="label" htmlFor="tests">Tests</label>

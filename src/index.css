@@ -172,7 +172,7 @@ a:hover {
 
 .textarea {
     width: 100%;
-    height: 40rem;
+    height: 20rem;
 }
 
 
@@ -276,6 +276,10 @@ a:hover {
 .carousel>ul {
     width: fit-content;
     display: flex;
+    justify-content: center;
+
+    min-width: 100%;
+
     gap: 1rem;
     list-style-type: none;
 }

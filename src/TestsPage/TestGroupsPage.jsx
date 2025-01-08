@@ -51,8 +51,8 @@ export default function TestGroupsPage() {
                             <Link to={`/profile/tests/${test_group.id}`} key={test_group.id} className="card clickable">
                                 <h3 className="card__title">{test_group.name}</h3>
                                 <div className="card__content">
-                                    <p>time limit: {test_group.time_limit}</p>
-                                    <p>memory limit: {test_group.memory_limit}</p>
+                                    <p>time limit: {test_group.time_limit}ms</p>
+                                    <p>memory limit: {test_group.memory_limit}mb</p>
                                     <p>tests count: {test_group.quantity_tests}</p>
                                 </div>
                             </Link>

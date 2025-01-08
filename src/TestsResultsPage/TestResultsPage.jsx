@@ -2,6 +2,7 @@ import { useEffect, useState } from "react"
 
 import { WidgetWithState, NoneState, LoadingState, SuccessState, ErrorState } from "../WidgetWithState"
 import { getTestResults } from "../api/tests"
+import { Link } from "react-router-dom"
 
 
 export default function TestResultsPage() {
@@ -31,7 +32,8 @@ export default function TestResultsPage() {
                         <div className="card" key={test_result.id}>
                             <h3 className="card__title">Test result {test_result.id}</h3>
                             <div className="card__content">
-                                <p>Max time: {test_result.max_time}.</p>
+                                <p>Language: {test_result.language}.</p>
+                                <p>Max time: {test_result.max_execution_time}.</p>
                                 <p>Max memory: {test_result.max_memory}.</p>
                                 <p className={test_result.verdict === "OK" ? "box-ok" : "box-warning"}>{test_result.verdict}</p>
                                 <div className="carousel">
@@ -43,6 +45,7 @@ export default function TestResultsPage() {
                                         ))}
                                     </ul>
                                 </div>
+                                <Link to={`/profile/tests/${test_result.group_id}`}>View test group</Link>
                             </div>
                         </div>
                     ))}
